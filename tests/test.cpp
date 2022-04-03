@@ -2,12 +2,9 @@
 #include <doctest/doctest.h>
 #include <odb/odb.hpp>
 
-class FloatId : public odb::Id<float> {
-};
-
 TEST_CASE("TEEEEST")
 {
-    auto database = odb::Database<FloatId>{};
+    auto database = odb::Database<float>{};
 
     auto id = database.insert(153.f);
     {

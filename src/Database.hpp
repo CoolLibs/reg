@@ -1,14 +1,17 @@
 #pragma once
 #include <optional>
 #include <unordered_map>
+#include "Id.hpp"
 #include "Uuid.hpp"
 
 namespace odb {
 
-template<typename Id>
+template<typename T>
 class Database {
 public:
-    auto get(const Id& id) const -> std::optional<typename Id::ValueType>
+    using ValueType = T;
+
+    auto get(const Id<T>& id) const -> std::optional<T>
     {
         if (!id._uuid.has_value()) {
             return std::nullopt;
@@ -23,16 +26,16 @@ public:
         }
     }
 
-    [[nodiscard]] auto insert(typename Id::ValueType value) -> Id
+    [[nodiscard]] auto insert(T value) -> Id<T>
     {
         const auto uuid = internal::Uuid{};
-        const auto id   = Id{uuid};
+        const auto id   = Id<T>{uuid};
         _map.insert(std::make_pair(uuid.get(), value));
         return id;
     }
 
 private:
-    std::unordered_map<typename internal::Uuid::StorageType, typename Id::ValueType> _map;
+    std::unordered_map<typename internal::Uuid::StorageType, T> _map;
 };
 
 } // namespace odb

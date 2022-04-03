@@ -1,10 +1,11 @@
 #pragma once
+#include <cstdint>
 
 namespace odb::internal {
 
 class Uuid {
 public:
-    using StorageType = unsigned long long;
+    using StorageType = uint64_t;
 
     Uuid();
 

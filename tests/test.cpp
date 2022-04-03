@@ -8,18 +8,18 @@ TEST_CASE("TEEEEST")
 
     auto id = database.insert(153.f);
     {
-        auto value = database.get(id);
-        REQUIRE(value.has_value());
+        const float* const value = database.get(id);
+        REQUIRE(value);
         REQUIRE(*value == 153.f);
     }
 
     auto id2 = database.insert(10.f);
     {
-        auto value = database.get(id);
-        REQUIRE(value.has_value());
+        const float* const value = database.get(id);
+        REQUIRE(value);
         REQUIRE(*value == 153.f);
-        auto value2 = database.get(id2);
-        REQUIRE(value2.has_value());
+        const float* const value2 = database.get(id2);
+        REQUIRE(value2);
         REQUIRE(*value2 == 10.f);
     }
 }

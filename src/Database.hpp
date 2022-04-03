@@ -11,18 +11,31 @@ class Database {
 public:
     using ValueType = T;
 
-    auto get(const Id<T>& id) const -> std::optional<T>
+    auto get(const Id<T>& id) -> T*
     {
         if (!id._uuid.has_value()) {
-            return std::nullopt;
+            return nullptr;
         }
-
-        const auto it = _map.find(id._uuid->get());
+        auto it = _map.find(id._uuid->get());
         if (it != _map.end()) {
-            return it->second;
+            return &it->second;
         }
         else {
-            return std::nullopt;
+            return nullptr;
+        }
+    }
+
+    auto get(const Id<T>& id) const -> const T*
+    {
+        if (!id._uuid.has_value()) {
+            return nullptr;
+        }
+        const auto it = _map.find(id._uuid->get());
+        if (it != _map.end()) {
+            return &it->second;
+        }
+        else {
+            return nullptr;
         }
     }
 

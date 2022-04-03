@@ -39,7 +39,7 @@ public:
         }
     }
 
-    [[nodiscard]] auto insert(T value) -> Id<T>
+    [[nodiscard]] auto insert(T&& value) -> Id<T>
     {
         const auto uuid = internal::Uuid{};
         const auto id   = Id<T>{uuid};

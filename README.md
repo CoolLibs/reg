@@ -1,5 +1,17 @@
 # reg
 
+- [Brief](#brief)
+- [Use case](#use-case)
+- [Why can't I use native pointers (*) or references (&)?](#why-can-t-i-use-native-pointers-----or-references-----)
+- [Tutorial](#tutorial)
+    * [Creating an object](#creating-an-object)
+    * [Accessing an object](#accessing-an-object)
+    * [Destroying an object](#destroying-an-object)
+    * [Iterating over all the objects](#iterating-over-all-the-objects)
+- [Notes](#notes)
+    * [There is no automatic lifetime management](#there-is-no-automatic-lifetime-management)
+- [TODO](#todo)
+
 ## Brief
 
 Gives an identity to your value-types, turning them into objects stored in a `reg::Registry`. You can reference and access your objects through a `reg::Id`.

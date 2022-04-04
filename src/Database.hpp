@@ -1,8 +1,7 @@
 #pragma once
-#include <optional>
+#include <uuid.h>
 #include <unordered_map>
 #include "Id.hpp"
-#include "Uuid.hpp"
 
 namespace odb {
 
@@ -13,10 +12,10 @@ public:
 
     auto get(const Id<T>& id) -> T*
     {
-        if (!id._uuid.has_value()) {
+        if (id._uuid.is_nil()) {
             return nullptr;
         }
-        auto it = _map.find(id._uuid->get());
+        auto it = _map.find(id._uuid);
         if (it != _map.end()) {
             return &it->second;
         }
@@ -27,7 +26,7 @@ public:
 
     auto get(const Id<T>& id) const -> const T*
     {
-        if (!id._uuid.has_value()) {
+        if (id._uuid.is_nil()) {
             return nullptr;
         }
         const auto it = _map.find(id._uuid->get());
@@ -41,14 +40,14 @@ public:
 
     [[nodiscard]] auto insert(T&& value) -> Id<T>
     {
-        const auto uuid = internal::Uuid{};
+        const auto uuid = uuids::uuid_system_generator{}();
         const auto id   = Id<T>{uuid};
-        _map.insert(std::make_pair(uuid.get(), value));
+        _map.insert(std::make_pair(uuid, value));
         return id;
     }
 
 private:
-    std::unordered_map<typename internal::Uuid::StorageType, T> _map;
+    std::unordered_map<uuids::uuid, T> _map;
 };
 
 } // namespace odb

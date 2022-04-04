@@ -1,6 +1,5 @@
 #pragma once
-#include <optional>
-#include "Uuid.hpp"
+#include <uuid.h>
 
 namespace odb {
 
@@ -14,7 +13,7 @@ private:
     template<typename ThisIdType>
     friend class Database;
 
-    Id(internal::Uuid uuid)
+    Id(uuids::uuid uuid)
         : _uuid{uuid}
     {
     }
@@ -25,7 +24,7 @@ private:
     }
 
 private:
-    std::optional<internal::Uuid> _uuid{std::nullopt};
+    uuids::uuid _uuid{};
 };
 
 } // namespace odb

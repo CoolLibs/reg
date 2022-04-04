@@ -10,7 +10,7 @@
   * [More examples](#more-examples)
 - [Notes](#notes)
   * [Why can't I just use native pointers (*) or references (&)?](#why-can-t-i-use-native-pointers-----or-references-----)
-  * [There is no automatic lifetime management](#there-is-no-automatic-lifetime-management)
+  * [We don't provide automatic lifetime management](#there-is-no-automatic-lifetime-management)
 
 ## Brief
 
@@ -94,6 +94,6 @@ Even during the lifetime of the application pointers can get invalidated. For ex
 
 And references (&) suffer from the exact same problems.
 
-### There is no automatic lifetime management
+### We don't provide automatic lifetime management
 
 We don't provide `unique_ptr` and `shared_ptr`-like functionnalities because you don't want all your objects to be removed from the registry when the application shuts down and everything gets destroyed.

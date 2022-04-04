@@ -4,21 +4,21 @@
 
 TEST_CASE("TEEEEST")
 {
-    auto database = reg::Database<float>{};
+    auto registry = reg::Registry<float>{};
 
-    auto id = database.insert(153.f);
+    auto id = registry.insert(153.f);
     {
-        const float* const value = database.get(id);
+        const float* const value = registry.get(id);
         REQUIRE(value);
         REQUIRE(*value == 153.f);
     }
 
-    auto id2 = database.insert(10.f);
+    auto id2 = registry.insert(10.f);
     {
-        const float* const value = database.get(id);
+        const float* const value = registry.get(id);
         REQUIRE(value);
         REQUIRE(*value == 153.f);
-        const float* const value2 = database.get(id2);
+        const float* const value2 = registry.get(id2);
         REQUIRE(value2);
         REQUIRE(*value2 == 10.f);
     }

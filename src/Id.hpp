@@ -11,7 +11,7 @@ public:
 
 private:
     template<typename ThisIdType>
-    friend class Database;
+    friend class Registry;
 
     Id(uuids::uuid uuid)
         : _uuid{uuid}

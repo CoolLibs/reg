@@ -6,7 +6,7 @@
 namespace reg {
 
 template<typename T>
-class Database {
+class Registry {
 public:
     using ValueType = T;
 

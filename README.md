@@ -2,13 +2,13 @@
 
 - [Brief](#brief)
 - [Use case](#use-case)
-- [Why can't I use native pointers (*) or references (&)?](#why-can-t-i-use-native-pointers-----or-references-----)
 - [Tutorial](#tutorial)
     * [Creating an object](#creating-an-object)
     * [Accessing an object](#accessing-an-object)
     * [Destroying an object](#destroying-an-object)
     * [Iterating over all the objects](#iterating-over-all-the-objects)
 - [Notes](#notes)
+    * [Why can't I use native pointers (*) or references (&)?](#why-can-t-i-use-native-pointers-----or-references-----)
     * [There is no automatic lifetime management](#there-is-no-automatic-lifetime-management)
 - [TODO](#todo)
 
@@ -28,14 +28,6 @@ This library was designed for this specific use case:
 
 ![](./docs/img/blender-hierarchy.png)
 > The *Cube*'s constraint references the *MyPosition* object. We want this reference to live forever (or at least until the user changes it).
-
-## Why can't I use native pointers (*) or references (&)?
-
-Pointers and references are tied to an address in memory, which is something that can change. For example if you close and restart your application your objects will likely not be created in the same location in memory as they were before, so if you saved a pointer and try to reuse it, it will likely be pointing to garbage memory now.
-
-Even during the lifetime of the application pointers can get invalidated. For example if you store some objects in a `std::vector`, and then later add one more object to that vector, it might need to resize, which will make all the objects it contains move to a new location in memory. If you had pointers pointing to the objects in the vector they will now be dangling!
-
-And references (&) suffer from the exact same problems.
 
 ## Tutorial
 
@@ -58,6 +50,14 @@ for (const auto&[id, object] : registry.key_value_pairs()) {} // Or should it be
 ```
 
 ## Notes
+
+### Why can't I use native pointers (*) or references (&)?
+
+Pointers and references are tied to an address in memory, which is something that can change. For example if you close and restart your application your objects will likely not be created in the same location in memory as they were before, so if you saved a pointer and try to reuse it, it will likely be pointing to garbage memory now.
+
+Even during the lifetime of the application pointers can get invalidated. For example if you store some objects in a `std::vector`, and then later add one more object to that vector, it might need to resize, which will make all the objects it contains move to a new location in memory. If you had pointers pointing to the objects in the vector they will now be dangling!
+
+And references (&) suffer from the exact same problems.
 
 ### There is no automatic lifetime management
 

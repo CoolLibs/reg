@@ -4,7 +4,7 @@
 
 Gives an identity to your value-types, turning them into objects stored in a `reg::Registry`. You can reference and access your objects through a `reg::Id`.
 
-You can see `reg::Id`s as references which will never get invalidated unless you explicitly ask to destroy the object. And even after an object has been destroyed it is safe to query the registry for the destroyed object: the registry will simply return `nullptr` and you will have to handle the fact that the object no longer exists. Basically this is like a reference which knows whether it is dangling or not and will never let you read garbage memory.
+You can see `reg::Id`s as references which will never get invalidated unless you explicitly ask the registry to destroy the object. And even after an object has been destroyed it is safe to query the registry for the destroyed object through its id: the registry will simply return `nullptr` and you will have to handle the fact that the object no longer exists. Basically this is like a reference which knows whether it is dangling or not and will never let you read garbage memory.
 
 This library allows you to manually control the lifetime of objects, and to keep references to those objects that will never get invalidated, even upon restarting your application. Those references are safe to serialize.
 

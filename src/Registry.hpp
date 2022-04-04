@@ -40,7 +40,7 @@ public:
 
     [[nodiscard]] auto create(T&& value) -> Id<T>
     {
-        const auto uuid = uuids::uuid_system_generator{}(); // TODO make system generator static and thread-safe
+        const auto uuid = uuids::uuid_system_generator{}(); // This should be thread-safe on all OSes // Creating a uuid_system_generator is cheap, this class is empty.
         const auto id   = Id<T>{uuid};
         _map.insert({id, value});
         return id;

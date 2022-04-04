@@ -3,14 +3,14 @@
 - [Brief](#brief)
 - [Use case](#use-case)
 - [Tutorial](#tutorial)
-    * [Creating an object](#creating-an-object)
-    * [Accessing an object](#accessing-an-object)
-    * [Destroying an object](#destroying-an-object)
-    * [Iterating over all the objects](#iterating-over-all-the-objects)
+  * [Creating an object](#creating-an-object)
+  * [Accessing an object](#accessing-an-object)
+  * [Destroying an object](#destroying-an-object)
+  * [Iterating over all the objects](#iterating-over-all-the-objects)
+  * [More examples](#more-examples)
 - [Notes](#notes)
-    * [Why can't I use native pointers (*) or references (&)?](#why-can-t-i-use-native-pointers-----or-references-----)
-    * [There is no automatic lifetime management](#there-is-no-automatic-lifetime-management)
-- [TODO](#todo)
+  * [Why can't I just use native pointers (*) or references (&)?](#why-can-t-i-use-native-pointers-----or-references-----)
+  * [There is no automatic lifetime management](#there-is-no-automatic-lifetime-management)
 
 ## Brief
 
@@ -33,25 +33,60 @@ This library was designed for this specific use case:
 
 ### Creating an object
 
+A `reg::registry` stores values of a given type. For example you can create a
+```cpp
+reg::Registry<float> registry{};
+```
+
+(NB: if you want to store multiple types in the same registry you can always use a `std::variant` or `std::any`).
+
+You can then create objects in the registry:
+```cpp
+reg::Id<float> id{ registry.create(5.f) };
+```
+
 ### Accessing an object
 
+Since the object could have been destroyed at any time by another part of the application, you always have to check that `get()` actually returned you a value:
+
+```cpp
+const float* const maybe_value{ registry.get(id) };
+if (maybe_value) // Check that `maybe_value` contains a value
+{
+    std::cout << "My float is "
+              << std::to_string(*maybe_value) // use the value `*maybe_value`
+              << '\n';
+}
+```
+
 ### Destroying an object
+
+You can always call `destroy()`, even if the id isn't valid. This will remove the object from the registry (if it was there in the first place).
+
+```cpp
+registry.destroy(id);
+```
 
 ### Iterating over all the objects
 
 You can iterate over all the objects in the registry, but the order is not guaranteed. This is why you should probably maintain your own `std::vector<reg::Id<T>>` to have the control over the order the objects will be displayed in in your UI for example.
 
-```cpp We want to have both ways to iterate: only the objects, or objects and ids
+```cpp
 
-for (const T& object : registry) {}
+for (const auto&[id, value] : registry) 
+{
 
-for (const auto&[id, object] : registry.key_value_pairs()) {} // Or should it be named `id_object_pairs()`? And have also `.ids()` and `.objects()`? Do these through a proxy
+}
 
 ```
 
+### More examples
+
+Check out [our tests](./tests/test.cpp) for more examples of how to use the library.
+
 ## Notes
 
-### Why can't I use native pointers (*) or references (&)?
+### Why can't I just use native pointers (*) or references (&)?
 
 Pointers and references are tied to an address in memory, which is something that can change. For example if you close and restart your application your objects will likely not be created in the same location in memory as they were before, so if you saved a pointer and try to reuse it, it will likely be pointing to garbage memory now.
 
@@ -65,3 +100,5 @@ We don't provide `unique_ptr` and `shared_ptr`-like functionnalities because you
 
 ## TODO
 
+- allow to emplace from constructor's arguments
+- allow to iterate over objects only

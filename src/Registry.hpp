@@ -10,6 +10,13 @@ class Registry {
 public:
     using ValueType = T;
 
+    Registry()           = default;
+    Registry(Registry&&) = default;
+    Registry& operator=(Registry&&) = default;
+
+    Registry(const Registry&) = delete;            // This class is non-copyable
+    Registry& operator=(const Registry&) = delete; // because it is the unique owner of the objects it stores
+
     [[nodiscard]] auto get(const Id<T>& id) -> T*
     {
         if (id.is_nil()) {

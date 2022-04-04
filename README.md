@@ -12,7 +12,7 @@ This library allows you to manually control the lifetime of objects, and to keep
 
 This library was designed for this specific use case:
 
-**_You want to create user-facing objects that will be referenceable across the application, as in Blender's scene hierarchy:_**
+**_You want to create user-facing objects that will be referenceable across the application, as in Blender's Scene Collection:_**
 
 ![](./docs/img/blender-hierarchy.png)
 > The *Cube*'s constraint references the *MyPosition* object. We want this reference to live forever (or at least until the user changes it).
@@ -49,11 +49,10 @@ for (const auto&[id, object] : registry.key_value_pairs()) {} // Or should it be
 
 ### There is no automatic lifetime management
 
-We don't provided `unique_ptr` and `shared_ptr`-like functionnalities because you don't want all your objects to be removed from the registry when the application shuts down and everything gets destroyed.
+We don't provide `unique_ptr` and `shared_ptr`-like functionnalities because you don't want all your objects to be removed from the registry when the application shuts down and everything gets destroyed.
 
 ## TODO
 
 - Use a real uuid library
-- Decide between Database and Registry for the name
 - Add the destroy function (and rename insert as create?)
 -  test the objects_count() of the registry thanks to the begin() and end() iterators

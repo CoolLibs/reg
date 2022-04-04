@@ -1,5 +1,6 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
+#include <cassert>
 #include <reg/reg.hpp>
 
 template<typename T>
@@ -79,5 +80,17 @@ TEST_CASE("Objects can be created, retrieved and destroyed")
         REQUIRE(!value1);
         REQUIRE(value2);
         REQUIRE(*value2 == 10.f);
+    }
+}
+
+TEST_CASE("You can iterate over the ids and values in the registry")
+{
+    auto       registry = reg::Registry<float>{};
+    const auto my_value = 1.f;
+    const auto my_id    = registry.create(my_value);
+
+    for (const auto& [id, value] : registry) {
+        assert(id == my_id);       // Can't use doctest's REQUIRE() because of a weird interaction between lambda captures and structured bindings :'( https://github.com/doctest/doctest/issues/279
+        assert(value == my_value); // Same
     }
 }

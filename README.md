@@ -97,8 +97,3 @@ And references (&) suffer from the exact same problems.
 ### There is no automatic lifetime management
 
 We don't provide `unique_ptr` and `shared_ptr`-like functionnalities because you don't want all your objects to be removed from the registry when the application shuts down and everything gets destroyed.
-
-## TODO
-
-- allow to emplace from constructor's arguments
-- allow to iterate over objects only

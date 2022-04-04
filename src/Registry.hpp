@@ -12,42 +12,47 @@ public:
 
     auto get(const Id<T>& id) -> T*
     {
-        if (id._uuid.is_nil()) {
+        if (id.is_nil()) {
             return nullptr;
         }
-        auto it = _map.find(id._uuid);
-        if (it != _map.end()) {
-            return &it->second;
+        auto it = _map.find(id);
+        if (it == _map.end()) {
+            return nullptr;
         }
         else {
-            return nullptr;
+            return &it->second;
         }
     }
 
     auto get(const Id<T>& id) const -> const T*
     {
-        if (id._uuid.is_nil()) {
+        if (id.is_nil()) {
             return nullptr;
         }
-        const auto it = _map.find(id._uuid->get());
-        if (it != _map.end()) {
-            return &it->second;
+        const auto it = _map.find(id);
+        if (it == _map.end()) {
+            return nullptr;
         }
         else {
-            return nullptr;
+            return &it->second;
         }
     }
 
-    [[nodiscard]] auto insert(T&& value) -> Id<T>
+    [[nodiscard]] auto create(T&& value) -> Id<T>
     {
-        const auto uuid = uuids::uuid_system_generator{}();
+        const auto uuid = uuids::uuid_system_generator{}(); // TODO make system generator static and thread-safe
         const auto id   = Id<T>{uuid};
-        _map.insert(std::make_pair(uuid, value));
+        _map.insert({id, value});
         return id;
     }
 
+    // void destroy(const Id<T>& id)
+    // {
+    //     const auto uuid
+    // }
+
 private:
-    std::unordered_map<uuids::uuid, T> _map;
+    std::unordered_map<Id<T>, T> _map;
 };
 
 } // namespace reg

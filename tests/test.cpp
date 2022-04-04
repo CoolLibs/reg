@@ -1,10 +1,10 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
-#include <odb/odb.hpp>
+#include <reg/reg.hpp>
 
 TEST_CASE("TEEEEST")
 {
-    auto database = odb::Database<float>{};
+    auto database = reg::Database<float>{};
 
     auto id = database.insert(153.f);
     {

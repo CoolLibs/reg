@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include "Id.hpp"
 
-namespace odb {
+namespace reg {
 
 template<typename T>
 class Database {
@@ -50,4 +50,4 @@ private:
     std::unordered_map<uuids::uuid, T> _map;
 };
 
-} // namespace odb
+} // namespace reg

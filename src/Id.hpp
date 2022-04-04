@@ -1,7 +1,7 @@
 #pragma once
 #include <uuid.h>
 
-namespace odb {
+namespace reg {
 
 template<typename T>
 class Id {
@@ -27,4 +27,4 @@ private:
     uuids::uuid _uuid{};
 };
 
-} // namespace odb
+} // namespace reg

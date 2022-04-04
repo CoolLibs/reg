@@ -12,7 +12,8 @@ This library allows you to manually control the lifetime of objects, and to keep
 
 This library was designed for this specific use case:
 
-You want to create user-facing objects that will be referenceable across the application, as in Blender's scene hierarchy:
+**_You want to create user-facing objects that will be referenceable across the application, as in Blender's scene hierarchy:_**
+
 ![](./docs/img/blender-hierarchy.png)
 > The *Cube*'s constraint references the *MyPosition* object. We want this reference to live forever (or at least until the user changes it).
 

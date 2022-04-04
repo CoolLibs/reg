@@ -45,7 +45,7 @@ public:
         }
     }
 
-    [[nodiscard]] auto create(T&& value) -> Id<T>
+    [[nodiscard]] auto create(const T& value) -> Id<T>
     {
         const auto uuid = uuids::uuid_system_generator{}(); // This should be thread-safe on all OSes // Creating a uuid_system_generator is cheap, this class is empty.
         const auto id   = Id<T>{uuid};

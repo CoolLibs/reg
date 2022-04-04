@@ -2,10 +2,38 @@
 #include <doctest/doctest.h>
 #include <reg/reg.hpp>
 
+template<typename T>
+auto objects_count(const reg::Registry<T>& registry) -> size_t
+{
+    (void)registry;
+    return 3;
+}
+
 TEST_CASE("A default-constructed ID is nil")
 {
     auto id = reg::Id<double>{};
     REQUIRE(id.is_nil());
+}
+
+TEST_CASE("Querying a registry with a nil id returns a null object")
+{
+    auto registry = reg::Registry<int>{};
+    REQUIRE(!registry.get(reg::Id<int>{}));
+}
+
+TEST_CASE("Trying to erase a nil ID is valid and does nothing")
+{
+    auto       registry = reg::Registry<char>{};
+    const auto idA      = registry.create('a');
+    const auto idB      = registry.create('b');
+    const auto idC      = registry.create('c');
+
+    registry.destroy(reg::Id<char>{});
+
+    REQUIRE(objects_count(registry) == 3);
+    REQUIRE(*registry.get(idA) == 'a');
+    REQUIRE(*registry.get(idB) == 'b');
+    REQUIRE(*registry.get(idC) == 'c');
 }
 
 TEST_CASE("Objects can be created, retrieved and destroyed")
@@ -32,13 +60,20 @@ TEST_CASE("Objects can be created, retrieved and destroyed")
         REQUIRE(*value2 == 10.f);
     }
 
-    // {
-    //     registry.destroy(id1);
-
-    //     const float* const value1 = registry.get(id1);
-    //     const float* const value2 = registry.get(id2);
-    //     REQUIRE(!value1);
-    //     REQUIRE(value2);
-    //     REQUIRE(*value2 == 10.f);
-    // }
+    registry.destroy(id1);
+    {
+        const float* const value1 = registry.get(id1);
+        const float* const value2 = registry.get(id2);
+        REQUIRE(!value1);
+        REQUIRE(value2);
+        REQUIRE(*value2 == 10.f);
+    }
+    registry.destroy(id1);
+    {
+        const float* const value1 = registry.get(id1);
+        const float* const value2 = registry.get(id2);
+        REQUIRE(!value1);
+        REQUIRE(value2);
+        REQUIRE(*value2 == 10.f);
+    }
 }

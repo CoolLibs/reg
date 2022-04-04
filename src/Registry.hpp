@@ -46,10 +46,10 @@ public:
         return id;
     }
 
-    // void destroy(const Id<T>& id)
-    // {
-    //     const auto uuid
-    // }
+    void destroy(const Id<T>& id)
+    {
+        _map.erase(id);
+    }
 
 private:
     std::unordered_map<Id<T>, T> _map;

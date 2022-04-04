@@ -51,6 +51,13 @@ public:
         _map.erase(id);
     }
 
+    auto begin() { return _map.begin(); }
+    auto end() { return _map.end(); }
+    auto cbegin() const { return _map.cbegin(); }
+    auto cend() const { return _map.cend(); }
+    auto begin() const { return _map.begin(); }
+    auto end() const { return _map.end(); }
+
 private:
     std::unordered_map<Id<T>, T> _map;
 };

@@ -65,5 +65,3 @@ We don't provide `unique_ptr` and `shared_ptr`-like functionnalities because you
 
 ## TODO
 
-- Add the destroy function (and rename insert as create?)
--  test the objects_count() of the registry thanks to the begin() and end() iterators

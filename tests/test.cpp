@@ -5,8 +5,8 @@
 template<typename T>
 auto objects_count(const reg::Registry<T>& registry) -> size_t
 {
-    (void)registry;
-    return 3;
+    return std::distance(std::begin(registry),
+                         std::end(registry));
 }
 
 TEST_CASE("A default-constructed ID is nil")
@@ -42,6 +42,7 @@ TEST_CASE("Objects can be created, retrieved and destroyed")
 
     auto id1 = registry.create(153.f);
     REQUIRE(!id1.is_nil());
+    REQUIRE(objects_count(registry) == 1);
     {
         const float* const value1 = registry.get(id1);
         REQUIRE(value1);
@@ -51,6 +52,7 @@ TEST_CASE("Objects can be created, retrieved and destroyed")
     auto id2 = registry.create(10.f);
     REQUIRE(!id2.is_nil());
     REQUIRE(id2 != id1);
+    REQUIRE(objects_count(registry) == 2);
     {
         const float* const value1 = registry.get(id1);
         const float* const value2 = registry.get(id2);
@@ -61,6 +63,7 @@ TEST_CASE("Objects can be created, retrieved and destroyed")
     }
 
     registry.destroy(id1);
+    REQUIRE(objects_count(registry) == 1);
     {
         const float* const value1 = registry.get(id1);
         const float* const value2 = registry.get(id2);
@@ -69,6 +72,7 @@ TEST_CASE("Objects can be created, retrieved and destroyed")
         REQUIRE(*value2 == 10.f);
     }
     registry.destroy(id1);
+    REQUIRE(objects_count(registry) == 1);
     {
         const float* const value1 = registry.get(id1);
         const float* const value2 = registry.get(id2);

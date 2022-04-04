@@ -11,8 +11,6 @@ public:
 
     friend auto operator<=>(const Id<T>&, const Id<T>&) = default;
 
-    auto is_nil() const -> bool { return _uuid.is_nil(); }
-
 private:
     template<typename SomeType>
     friend class Registry;

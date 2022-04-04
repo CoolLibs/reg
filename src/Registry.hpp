@@ -19,9 +19,6 @@ public:
 
     [[nodiscard]] auto get(const Id<T>& id) -> T*
     {
-        if (id.is_nil()) {
-            return nullptr;
-        }
         auto it = _map.find(id);
         if (it == _map.end()) {
             return nullptr;
@@ -33,9 +30,6 @@ public:
 
     [[nodiscard]] auto get(const Id<T>& id) const -> const T*
     {
-        if (id.is_nil()) {
-            return nullptr;
-        }
         const auto it = _map.find(id);
         if (it == _map.end()) {
             return nullptr;

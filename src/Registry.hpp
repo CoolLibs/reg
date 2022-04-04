@@ -10,7 +10,7 @@ class Registry {
 public:
     using ValueType = T;
 
-    auto get(const Id<T>& id) -> T*
+    [[nodiscard]] auto get(const Id<T>& id) -> T*
     {
         if (id.is_nil()) {
             return nullptr;
@@ -24,7 +24,7 @@ public:
         }
     }
 
-    auto get(const Id<T>& id) const -> const T*
+    [[nodiscard]] auto get(const Id<T>& id) const -> const T*
     {
         if (id.is_nil()) {
             return nullptr;

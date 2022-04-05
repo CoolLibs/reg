@@ -79,20 +79,21 @@ You can iterate over all the objects in the registry, but the order is not guara
 
 for (const auto&[id, value] : registry) 
 {
-
+    // ...
 }
 
 ```
 
 ### Thread safety
 
-This library is completely thread-safe! // TODO think if we want this (and make it true if we actually want this)
+:warning: **Using a `reg::Registry` is not thread-safe!**
 
-This is why `get()` returns a copy instead of a reference. -> WE CAN RETURN a std::optional<T> instead of an ugly pointer !
+Trying to create or destroy objects concurrently is undefined behaviour ([as for all the `std` containers](https://stackoberflow.com/a/9685609)), and the pointer returned by `get()` could be invalidated by another thread at any time.
 
-Then we add a registry.set(id, value)
+If you are only reading on all the threads (using the const version of `get()`) then this is fine. But if you want to mutate the registry by using `create()`, `destroy()` or the non-const version of `get()` then you need to be very careful!
+Use a mutex or another synchronization mechanism when you want to call `create()` or `destroy()` or modify an object through the non-const `get()`, and take copies of the values returned by `get()` if another thread might destroy the pointed object.
 
-TODO add inline documentation
+We made that choice because we wanted `get()` to return by reference instead of value. This is to allow the use of registries to store big objects like meshes that we can't afford to copy all the time.
 
 ### More examples
 
@@ -111,3 +112,7 @@ And references (&) suffer from the exact same problems.
 ### We don't provide automatic lifetime management
 
 We don't provide `unique_ptr` and `shared_ptr`-like functionnalities because you don't want all your objects to be removed from the registry when the application shuts down and everything gets destroyed.
+
+## TODO
+
+- add inline documentation

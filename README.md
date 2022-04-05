@@ -14,7 +14,7 @@
 
 ## Brief
 
-Gives an identity to your value-types, turning them into objects stored in a `reg::Registry`. You can reference and access your objects through a `reg::Id`.
+This library gives an identity to your value-types, turning them into objects stored in a `reg::Registry`. You can reference and access your objects through a `reg::Id`.
 
 You can see `reg::Id`s as references which will never get invalidated unless you explicitly ask the registry to destroy the object. And even after an object has been destroyed it is safe to query the registry for the destroyed object through its id: the registry will simply return `nullptr` and you will have to handle the fact that the object no longer exists. Basically this is like a reference which knows whether it is dangling or not and will never let you read garbage memory.
 
@@ -33,7 +33,7 @@ This library was designed for this specific use case:
 
 ### Creating an object
 
-A `reg::registry` stores values of a given type. For example you can create a
+A `reg::Registry` stores values of a given type. For example you can create a
 ```cpp
 reg::Registry<float> registry{};
 ```
@@ -44,6 +44,8 @@ You can then create objects in the registry:
 ```cpp
 reg::Id<float> id{ registry.create(5.f) };
 ```
+
+this will return you an id that you can later use to get your object back from the registry.
 
 ### Accessing an object
 
@@ -58,6 +60,8 @@ if (maybe_value) // Check that `maybe_value` contains a value
               << '\n';
 }
 ```
+
+**NB:** you should never store a reference to the object returned by `get()`: this would defeat the whole point of this library! Always query the current value by using `get()` when you need it.
 
 ### Destroying an object
 
@@ -80,6 +84,16 @@ for (const auto&[id, value] : registry)
 
 ```
 
+### Thread safety
+
+This library is completely thread-safe! // TODO think if we want this (and make it true if we actually want this)
+
+This is why `get()` returns a copy instead of a reference. -> WE CAN RETURN a std::optional<T> instead of an ugly pointer !
+
+Then we add a registry.set(id, value)
+
+TODO add inline documentation
+
 ### More examples
 
 Check out [our tests](./tests/test.cpp) for more examples of how to use the library.
@@ -88,9 +102,9 @@ Check out [our tests](./tests/test.cpp) for more examples of how to use the libr
 
 ### Why can't I just use native pointers (*) or references (&)?
 
-Pointers and references are tied to an address in memory, which is something that can change. For example if you close and restart your application your objects will likely not be created in the same location in memory as they were before, so if you saved a pointer and try to reuse it, it will likely be pointing to garbage memory now.
+Pointers and references are tied to an address in memory, which is something that can change. For example if you close and restart your application your objects will likely not be created in the same location in memory as they were before, so if you saved a pointer and try to reuse it it will likely be pointing to garbage memory now.
 
-Even during the lifetime of the application pointers can get invalidated. For example if you store some objects in a `std::vector`, and then later add one more object to that vector, it might need to resize, which will make all the objects it contains move to a new location in memory. If you had pointers pointing to the objects in the vector they will now be dangling!
+Even during the lifetime of the application pointers can get invalidated. For example if you store some objects in a `std::vector`, and then later add one more object to that vector it might need to resize, which will make all the objects it contains move to a new location in memory. If you had pointers pointing to the objects in the vector they will now be dangling!
 
 And references (&) suffer from the exact same problems.
 

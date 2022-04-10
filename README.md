@@ -1,4 +1,4 @@
-# reg, a registry library
+# *reg*, a registry library
 
 This library gives an identity to your value-types, turning them into objects stored in a `reg::Registry`. You can reference and access your objects through a `reg::Id`.
 

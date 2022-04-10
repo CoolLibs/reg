@@ -6,7 +6,8 @@ namespace reg {
 template<typename T>
 class Id {
 public:
-    Id()            = default;
+    Id() = default;
+    /// The type of values referenced by this id.
     using ValueType = T;
 
     friend auto operator<=>(const Id<T>&, const Id<T>&) = default;

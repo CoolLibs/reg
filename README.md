@@ -2,7 +2,7 @@
 
 This library gives an identity to your value-types, turning them into objects stored in a `reg::Registry`. You can reference and access your objects through a `reg::Id`.
 
-You can see `reg::Id`s as references which will never get invalidated unless you explicitly ask the registry to destroy the object. Even after an object has been destroyed it is safe to query the registry for the destroyed object through its id: the registry will simply return null (`nullptr` or `std::nullopt`) and you will have to handle the fact that the object no longer exists. Basically this is like a reference which knows whether it is dangling or not and will never let you read garbage memory.
+You can see `reg::Id`s as references which will never get invalidated, unless you explicitly ask the registry to destroy the object. Even after an object has been destroyed it is safe to query the registry for the destroyed object through its id: the registry will simply return null (`nullptr` or `std::nullopt`) and you will have to handle the fact that the object no longer exists. Basically this is like a reference which knows whether it is dangling or not and will never let you read garbage memory.
 
 This library allows you to manually control the lifetime of objects and to keep references to those objects. These references will never get invalidated, even upon restarting your application: they are safe to serialize.
 
@@ -91,7 +91,7 @@ The preferred way is to use `set()`:
 registry.set(id, 22.f);
 ```
 
-If the object was not present in the registry `set()` will do nothing and return `false`; otherwise it will return `true`.
+If the object was not present in the registry `set()` will do nothing and return `false`; otherwise it will set the value and return `true`.
 
 If your objects are big and you don't want to perform a full assignment (for example if you are storing `std::vector`s and only want to modify one element in one vector) you can use `get_mutable_ref()` instead:
 
@@ -114,7 +114,7 @@ If your objects are big and you don't want to perform a full assignment (for exa
 registry.destroy(id);
 ```
 
-You can always call `destroy()`, even if the id isn't valid. This will remove the object from the registry (if it was there in the first place).
+You can always call `destroy()`, even if the id isn't valid. This will remove the object from the registry (if it was there in the first place) and call its destructor.
 
 ### Iterating over all the objects
 
@@ -141,8 +141,8 @@ You can iterate over all the objects in the registry, but the order is not guara
 
 ### Managing the lifetime of objects
 
-:warning: **Important:** You have to manually delete (using `registry.destroy(id);`) the objects that you no longer need. You will get memory leaks if you forget to do that.
-This should not be a big deal if you use this library to store user-facing objects: the deletion of the objects will be tied to a user clicking *delete* in the UI, and you will just have to call `registry.destroy(id);` in the corresponding function.
+:warning: **Important:** You have to manually delete (using `registry.destroy(id);`) the objects that you no longer need. You will get memory leaks if you forget to do that.<br/>
+This should not be a big deal if you use this library to store user-facing objects: the deletion of the objects will be tied to a user clicking *delete* in the UI, and you will just have to call `registry.destroy(id);` whenever this happens.
 
 ### Thread safety
 
@@ -150,7 +150,8 @@ This should not be a big deal if you use this library to store user-facing objec
 
 **Most operations on a `reg::Registry` are thread-safe.** Internally we use a `std::shared_mutex` to lock the registry while we do some operations on it. The fact that the mutex is shared means that multiple threads can read from the registry at the same time, but locking will occur when you try to modify the registry or one of the objects it stores.
 
-We cannot do the locking automatically in the cases where we hand out references to objects in the registry, because we do not control how long those references will live. In those cases it is *your* responsibility to care about thread-safety. You can use `mutex()` to get the mutex and lock it yourself. You should only use the references while your are locking the mutex: once the lock is gone any thread could invalidate your reference at any time. (Alternatively you can make sure that only one thread ever accesses your registry, which is another way of solving the thread-safety problem.)
+We cannot do the locking automatically in the cases where we hand out references to objects in the registry, because we do not control how long those references will live. In those cases it is *your* responsibility to care about thread-safety. You can use `mutex()` to get the mutex and lock it yourself.<br/>
+You should only use the references while your are locking the mutex: once the lock is gone any thread could invalidate your reference at any time. (Or alternatively you can make sure that only one thread ever accesses your registry, which is another way of solving the thread-safety problem.)
 
 Those "unsafe" functions are useful if you cannot afford to pay the cost of the copy in `get()` or the assignment in `set()`, but you should prefer the safe ones in all the other cases, which should be most cases.
 
@@ -170,13 +171,13 @@ And references (&) suffer from the exact same problems.
 
 ### We don't provide automatic lifetime management
 
-We don't provide `unique_ptr` and `shared_ptr`-like functionnalities because you don't want all your objects to be removed from the registry when the application shuts down and everything gets destroyed.
+We don't provide `unique_ptr`-like or `shared_ptr`-like functionnalities because you don't want all your objects to be removed from the registry when the application shuts down and everything gets destroyed.
 
-If a given registry doesn't need to be serialized then we could provide those functionalities for it. But if you don't need serialization then you can get all the other benefits of a registry by simply using a `std::unique_ptr` or a `std::shared_ptr`; there would be no advantage to using a registry. (Or am I wrong?)
+If a given registry doesn't need to be serialized then we could provide those functionalities for it. But if you don't need serialization then you can get all of the other benefits of a registry by simply using a `std::unique_ptr` or a `std::shared_ptr`; there would be no advantage to using a registry. (Or am I wrong?)
 
 ### Performance is not our main concern
 
-Since a registry is designed to store user-visible values there likely won't be millions of them. We can therefore afford to prioritize safety and ease of use over performance.
+Since a registry is designed to store user-visible values, there likely won't be millions of them. We can therefore afford to prioritize safety and ease of use over performance.
 
 ## Future developments
 

@@ -5,14 +5,18 @@
 - [Tutorial](#tutorial)
   * [Creating an object](#creating-an-object)
   * [Accessing an object](#accessing-an-object)
+  * [Modifying an object](#modifying-an-object)
   * [Destroying an object](#destroying-an-object)
   * [Iterating over all the objects](#iterating-over-all-the-objects)
+  * [Managing the lifetime of objects](#managing-the-lifetime-of-objects)
+  * [Thread safety](#thread-safety)
   * [More examples](#more-examples)
 - [Notes](#notes)
-  * [Why can't I just use native pointers (*) or references (&)?](#why-can-t-i-use-native-pointers-----or-references-----)
-  * [We don't provide automatic lifetime management](#there-is-no-automatic-lifetime-management)
-
-  TODO update TOC
+  * [Why can't I just use native pointers (*) or references (&)?](#why-can-t-i-just-use-native-pointers-----or-references-----)
+  * [We don't provide automatic lifetime management](#we-don-t-provide-automatic-lifetime-management)
+  * [Performance is not our main concern](#performance-is-not-our-main-concern)
+- [Future developments](#future-developments)
+  * [`for_each` functions](#-for-each--functions)
 
 ## Brief
 

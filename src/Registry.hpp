@@ -65,13 +65,18 @@ public:
     /// Thread-safe.
     /// Sets the value of the object referenced by `id` to `value`.
     /// Does nothing if the `id` doesn't refer to an object in this registry.
-    void set(const Id<T>& id, const T& value)
+    /// Returns false iff the object was not found in the registry and this function did nothing.
+    auto set(const Id<T>& id, const T& value) -> bool
     {
         std::unique_lock lock{_mutex};
 
         auto it = _map.find(id);
         if (it != _map.end()) {
             it->second = value;
+            return true;
+        }
+        else {
+            return false;
         }
     }
 

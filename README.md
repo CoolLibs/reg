@@ -113,18 +113,6 @@ registry.destroy(id);
 
 You can always call `destroy()`, even if the id isn't valid. This will remove the object from the registry (if it was there in the first place).
 
-### Checking for an object's existence
-
-`contains()` will return true if and only if the object exists in the registry:
-
-```cpp
-if (registry.contains(id)) {
-    // ...
-}
-```
-
-Note that it is not thread-safe to assume that the object exists even if `contains()` returned `true`: another thread could destroy the object as soon as the call to `contains()` ends.
-
 ### Iterating over all the objects
 
 You can iterate over all the objects in the registry, but the order is not guaranteed. This is why you should probably maintain your own `std::vector<reg::Id<T>>` to have the control over the order the objects will be displayed in in your UI for example.

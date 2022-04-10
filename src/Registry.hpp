@@ -81,15 +81,6 @@ public:
     }
 
     /// Thread-safe.
-    /// Returns true iff `id` refers to an object in this registry.
-    [[nodiscard]] auto contains(const Id<T>& id) const -> bool
-    {
-        std::shared_lock lock{_mutex};
-
-        return _map.find(id) != _map.end();
-    }
-
-    /// Thread-safe.
     /// Inserts a copy of `value` into the registry.
     /// Returns the id that will then be used to reference the object that has just been created.
     [[nodiscard]] auto create(const T& value) -> Id<T>

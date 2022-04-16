@@ -36,6 +36,35 @@ TEST_CASE("Trying to erase an uninitialized id is valid and does nothing")
     REQUIRE(*registry.get(idC) == 'c');
 }
 
+TEST_CASE("IDs are unique, even across registries")
+{
+    auto       registry1 = reg::Registry<float>{};
+    auto       registry2 = reg::Registry<float>{};
+    const auto id11      = registry1.create(2.f);
+    const auto id12      = registry1.create(2.f);
+    const auto id13      = registry1.create(1.f);
+    const auto id21      = registry2.create(1.f);
+    const auto id22      = registry2.create(1.f);
+    const auto id23      = registry2.create(2.f);
+
+    REQUIRE(id11 == id11);
+    REQUIRE(id11 != id12);
+    REQUIRE(id11 != id13);
+    REQUIRE(id12 != id13);
+    REQUIRE(id21 != id22);
+    REQUIRE(id21 != id23);
+    REQUIRE(id22 != id23);
+
+    REQUIRE(id11 != id21);
+    REQUIRE(id11 != id22);
+    REQUIRE(id11 != id23);
+    REQUIRE(id12 != id21);
+    REQUIRE(id12 != id22);
+    REQUIRE(id12 != id23);
+    REQUIRE(id13 != id21);
+    REQUIRE(id13 != id22);
+    REQUIRE(id13 != id23);
+}
 
 TEST_CASE("An AnyId is equal to the Id it was created from")
 {
@@ -53,6 +82,7 @@ TEST_CASE("An AnyId is equal to the Id it was created from")
     REQUIRE(any_id1 != any_id2);
     REQUIRE(!(any_id1 == any_id2));
 }
+
 TEST_CASE("Getting an object")
 {
     auto       registry = reg::Registry<float>{};

@@ -19,7 +19,6 @@ TEST_CASE("Querying a registry with an uninitialized id returns a null object")
     REQUIRE(!registry.get(reg::Id<int>{}));
     REQUIRE(!registry.get_ref(reg::Id<int>{}));
     REQUIRE(!registry.get_mutable_ref(reg::Id<int>{}));
-    REQUIRE(!registry.contains(reg::Id<int>{}));
 }
 
 TEST_CASE("Trying to erase an uninitialized id is valid and does nothing")
@@ -64,16 +63,6 @@ TEST_CASE("Getting an object")
         REQUIRE(value);
         REQUIRE(*value == 17.f);
     }
-}
-
-TEST_CASE("contains()")
-{
-    auto       registry = reg::Registry<float>{};
-    const auto id       = registry.create(0.f);
-
-    REQUIRE(registry.contains(id));
-    registry.destroy(id);
-    REQUIRE(!registry.contains(id));
 }
 
 TEST_CASE("Objects can be created, retrieved and destroyed")

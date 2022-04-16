@@ -14,26 +14,16 @@ public:
     }
 
     friend bool operator==(const AnyId&, const AnyId&) = default;
-    // template<typename T>
-    // friend bool operator==(const AnyId& id1, const Id<T>& id2)
-    // {
-    //     return id1._uuid == id2._uuid;
-    // }
-    // template<typename T>
-    // friend bool operator==(const Id<T>& id2, const AnyId& id1)
-    // {
-    //     return id1 == id2;
-    // }
-    // template<typename T>
-    // friend bool operator!=(const AnyId& id1, const Id<T>& id2)
-    // {
-    //     return !(id1 == id2);
-    // }
-    // template<typename T>
-    // friend bool operator!=(const Id<T>& id2, const AnyId& id1)
-    // {
-    //     return !(id1 == id2);
-    // }
+    template<typename T>
+    friend bool operator==(const AnyId& id1, const Id<T>& id2)
+    {
+        return id1._uuid == id2._uuid;
+    }
+    template<typename T>
+    friend bool operator==(const Id<T>& id2, const AnyId& id1)
+    {
+        return id1 == id2;
+    }
 
 private:
     friend std::hash<AnyId>;

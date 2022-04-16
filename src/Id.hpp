@@ -15,6 +15,7 @@ public:
 private:
     template<typename SomeType>
     friend class Registry;
+    friend class AnyId;
     friend std::hash<Id<T>>;
 
     explicit Id(const uuids::uuid& uuid) // Only a Registry<T> is allowed to create a non-nil ID

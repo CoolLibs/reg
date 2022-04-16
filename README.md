@@ -155,6 +155,18 @@ You should only use the references while your are locking the mutex: once the lo
 
 Those "unsafe" functions are useful if you cannot afford to pay the cost of the copy in `get()` or the assignment in `set()`, but you should prefer the safe ones in all the other cases, which should be most cases.
 
+### `AnyId`
+
+`reg::AnyId` is a type that can store any `reg::Id<T>`. It has the exact same memory footprint as a `reg::Id<T>` and doesn't do any dynamic allocation either. (It basically stores the same uint128 as a `reg::Id<T>` does).<br/>
+It removes the type-safety of a `reg::Id` and is intended to only be used in cases where you want to store ids from different registries and don't care about their type. (For example when listing all the objects that some piece of code uses).
+
+```cpp
+auto       registry = reg::Registry<float>{};
+const auto id       = registry.create(1.f);
+const auto any_id   = reg::AnyId{id};
+assert(id == any_id); // They can be compared
+```
+
 ### More examples
 
 Check out [our tests](./tests/test.cpp) for more examples of how to use the library.

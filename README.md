@@ -17,6 +17,7 @@ This library allows you to manually control the lifetime of objects and to keep 
   * [Iterating over all the objects](#iterating-over-all-the-objects)
   * [Managing the lifetime of objects](#managing-the-lifetime-of-objects)
   * [Thread safety](#thread-safety)
+  * [AnyId](#anyid)
   * [More examples](#more-examples)
 - [Notes](#notes)
   * [Why can't I just use native pointers (*) or references (&)?](#why-can-t-i-just-use-native-pointers-----or-references-----)

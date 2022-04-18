@@ -212,29 +212,43 @@ TEST_CASE("Locking manually")
     }
 }
 
-TEST_CASE("Registries")
+TEST_CASE("Registries allows you to access the underlying registries by type")
 {
     using Registries = reg::Registries<int, float, double>;
     Registries registries{};
 
     {
-        reg::Registry<int>&       registry       = registries.get<int>();
+        reg::Registry<int>&       registry       = registries.of<int>();
         const reg::Id<int>        id             = registry.create(3);
-        const reg::Registry<int>& const_registry = registries.get<int>();
+        const reg::Registry<int>& const_registry = registries.of<int>();
         REQUIRE(const_registry.get(id) == 3);
     }
 
     {
-        reg::Registry<float>&       registry       = registries.get<float>();
+        reg::Registry<float>&       registry       = registries.of<float>();
         const reg::Id<float>        id             = registry.create(3.f);
-        const reg::Registry<float>& const_registry = registries.get<float>();
+        const reg::Registry<float>& const_registry = registries.of<float>();
         REQUIRE(const_registry.get(id) == 3.f);
     }
 
     {
-        reg::Registry<double>&       registry       = registries.get<double>();
+        reg::Registry<double>&       registry       = registries.of<double>();
         const reg::Id<double>        id             = registry.create(3.);
-        const reg::Registry<double>& const_registry = registries.get<double>();
+        const reg::Registry<double>& const_registry = registries.of<double>();
         REQUIRE(const_registry.get(id) == 3.);
+    }
+}
+
+TEST_CASE("Registries expose the thread-safe functions of the underlying registries")
+{
+    using Registries = reg::Registries<float, int, double>;
+    Registries registries{};
+    {
+        const auto id = registries.create(5);
+        REQUIRE(registries.get(id) == 5);
+        registries.set(id, 7);
+        REQUIRE(registries.get(id) == 7);
+        registries.destroy(id);
+        REQUIRE(!registries.get(id));
     }
 }

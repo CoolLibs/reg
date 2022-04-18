@@ -35,15 +35,39 @@ template<typename... Ts>
 class Registries {
 public:
     template<typename T>
-    auto get() -> Registry<T>&
+    auto of() -> Registry<T>&
     {
         return std::get<internal::type_index_v<reg::Registry<T>, Tuple>>(_registries);
     }
 
     template<typename T>
-    auto get() const -> const Registry<T>&
+    auto of() const -> const Registry<T>&
     {
         return std::get<internal::type_index_v<reg::Registry<T>, Tuple>>(_registries);
+    }
+
+    template<typename T>
+    [[nodiscard]] auto get(const Id<T>& id) const -> std::optional<T>
+    {
+        return of<T>().get(id);
+    }
+
+    template<typename T>
+    auto set(const Id<T>& id, const T& value) -> bool
+    {
+        return of<T>().set(id, value);
+    }
+
+    template<typename T>
+    [[nodiscard]] auto create(const T& value) -> Id<T>
+    {
+        return of<T>().create(value);
+    }
+
+    template<typename T>
+    void destroy(const Id<T>& id)
+    {
+        of<T>().destroy(id);
     }
 
 private:

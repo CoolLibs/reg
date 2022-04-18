@@ -177,8 +177,19 @@ assert(id == any_id); // They can be compared
     using Registries = reg::Registries<int, float, double>; // Creates 3 registries: 1 for int, 
     Registries registries{};                                // 1 for float and 1 for double
 
-    const reg::Registry<int>& const_registry = registries.get<int>(); // You can access each of the registries
-          reg::Registry<int>&       registry = registries.get<int>(); // with get<T>()
+    const reg::Registry<int>& const_registry = registries.of<int>(); // You can access each of the registries
+          reg::Registry<int>&       registry = registries.of<int>(); // with of<T>()
+```
+
+As a convenience, `reg::Registries` provides the thread-safe functions of a `reg::Registry` and will automatically call them on the right registry:
+
+```cpp
+using Registries = reg::Registries<int, float, double>;
+Registries registries{};
+
+const auto id = registries.create(5.f);             //
+const auto id = registries.create<float>(5.f);      // Those 3 lines are equivalent
+const auto id = registries.of<float>().create(5.f); //
 ```
 
 ### More examples

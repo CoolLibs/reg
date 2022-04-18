@@ -35,13 +35,13 @@ template<typename... Ts>
 class Registries {
 public:
     template<typename T>
-    Registry<T>& get()
+    auto get() -> Registry<T>&
     {
         return std::get<internal::type_index_v<reg::Registry<T>, Tuple>>(_registries);
     }
 
     template<typename T>
-    const Registry<T>& get() const
+    auto get() const -> const Registry<T>&
     {
         return std::get<internal::type_index_v<reg::Registry<T>, Tuple>>(_registries);
     }

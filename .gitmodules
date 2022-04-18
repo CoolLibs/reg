@@ -4,3 +4,6 @@
 [submodule "lib/stduuid"]
 	path = lib/stduuid
 	url = https://github.com/mariusbancila/stduuid
+[submodule "lib/cpp-typelist"]
+	path = lib/cpp-typelist
+	url = https://github.com/lipk/cpp-typelist

@@ -211,3 +211,30 @@ TEST_CASE("Locking manually")
         REQUIRE((*registry.get_ref(id2))[0] == 1.f);
     }
 }
+
+TEST_CASE("Registries")
+{
+    using Registries = reg::Registries<int, float, double>;
+    Registries registries{};
+
+    {
+        reg::Registry<int>&       registry       = registries.get<int>();
+        const reg::Id<int>        id             = registry.create(3);
+        const reg::Registry<int>& const_registry = registries.get<int>();
+        REQUIRE(const_registry.get(id) == 3);
+    }
+
+    {
+        reg::Registry<float>&       registry       = registries.get<float>();
+        const reg::Id<float>        id             = registry.create(3.f);
+        const reg::Registry<float>& const_registry = registries.get<float>();
+        REQUIRE(const_registry.get(id) == 3.f);
+    }
+
+    {
+        reg::Registry<double>&       registry       = registries.get<double>();
+        const reg::Id<double>        id             = registry.create(3.);
+        const reg::Registry<double>& const_registry = registries.get<double>();
+        REQUIRE(const_registry.get(id) == 3.);
+    }
+}

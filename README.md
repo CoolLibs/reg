@@ -18,6 +18,7 @@ This library allows you to manually control the lifetime of objects and to keep 
   * [Managing the lifetime of objects](#managing-the-lifetime-of-objects)
   * [Thread safety](#thread-safety)
   * [AnyId](#anyid)
+  * [Registries](#registries)
   * [More examples](#more-examples)
 - [Notes](#notes)
   * [Why can't I just use native pointers (*) or references (&)?](#why-can-t-i-just-use-native-pointers-----or-references-----)
@@ -166,6 +167,18 @@ auto       registry = reg::Registry<float>{};
 const auto id       = registry.create(1.f);
 const auto any_id   = reg::AnyId{id};
 assert(id == any_id); // They can be compared
+```
+
+### `Registries`
+
+`reg::Registries` is a type that holds a set of registries of different types:
+
+```cpp
+    using Registries = reg::Registries<int, float, double>; // Creates 3 registries: 1 for int, 
+    Registries registries{};                                // 1 for float and 1 for double
+
+    const reg::Registry<int>& const_registry = registries.get<int>(); // You can access each of the registries
+          reg::Registry<int>&       registry = registries.get<int>(); // with get<T>()
 ```
 
 ### More examples

@@ -19,6 +19,8 @@ This library allows you to manually control the lifetime of objects and to keep 
   * [Thread safety](#thread-safety)
   * [AnyId](#anyid)
   * [Registries](#registries)
+  * [Serialization and *cereal* support](#serialization-and-cereal-support)
+  * [underlying_xxx()](#underlying_xxx)
   * [More examples](#more-examples)
 - [Notes](#notes)
   * [Why can't I just use native pointers (*) or references (&)?](#why-can-t-i-just-use-native-pointers-----or-references-----)
@@ -191,6 +193,19 @@ const auto id = registries.create(5.f);             //
 const auto id = registries.create<float>(5.f);      // Those 3 lines are equivalent
 const auto id = registries.of<float>().create(5.f); //
 ```
+
+### Serialization and *cereal* support
+
+[*cereal* is a serialization library](https://uscilab.github.io/cereal/index.html). *reg* provides out of the box support for it and you can use *cereal* to save and load *reg* types without any efforts. You simply have to `#include <reg/Cereal.hpp>` to import the serialization functions.
+
+If you have another way of serializing your objects, see the `underlying_xxx()` section below.
+
+### `underlying_xxx()`
+
+These functions were added to allow you to add serialization support for the `reg` types; you can use them whenever you need access to the internals of the ids and registries.<br/>
+But beware that we do not offer any guarantee that the return types of these functions won't change. Code relying on them is susceptible to be broken by futur releases of the library. This sould be rare though and not hard to update.
+
+**Only use these functions when you cannot do otherwise, but feel free to use them when such cases arise.**
 
 ### More examples
 

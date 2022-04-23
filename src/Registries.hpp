@@ -70,9 +70,13 @@ public:
         of<T>().destroy(id);
     }
 
-private:
     using Tuple = typename tl::type_list<Ts...>::template wrap<reg::Registry>::to_tuple; // Create a tuple of reg::Registry<T> for each T in Ts
-    Tuple _registries;
+
+    auto underlying_registries() const -> const Tuple& { return _registries; }
+    auto underlying_registries() -> Tuple& { return _registries; }
+
+private:
+    Tuple _registries{};
 };
 
 } // namespace reg

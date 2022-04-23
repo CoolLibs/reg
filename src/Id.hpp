@@ -12,6 +12,9 @@ public:
 
     friend auto operator<=>(const Id<T>&, const Id<T>&) = default;
 
+    auto underlying_uuid() -> uuids::uuid& { return _uuid; }
+    auto underlying_uuid() const -> const uuids::uuid& { return _uuid; }
+
 private:
     template<typename SomeType>
     friend class Registry;

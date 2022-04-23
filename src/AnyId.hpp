@@ -15,6 +15,9 @@ public:
 
     friend bool operator==(const AnyId&, const AnyId&) = default;
 
+    auto underlying_uuid() -> uuids::uuid& { return _uuid; }
+    auto underlying_uuid() const -> const uuids::uuid& { return _uuid; }
+
 private:
     friend std::hash<AnyId>;
 

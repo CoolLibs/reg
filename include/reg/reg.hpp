@@ -4,3 +4,4 @@
 #include "../../src/Id.hpp"
 #include "../../src/Registries.hpp"
 #include "../../src/Registry.hpp"
+#include "../../src/utils.hpp"

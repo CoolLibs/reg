@@ -19,6 +19,7 @@ This library allows you to manually control the lifetime of objects and to keep 
   * [Thread safety](#thread-safety)
   * [AnyId](#anyid)
   * [Registries](#registries)
+  * [to_string()](#to_string)
   * [Serialization and *cereal* support](#serialization-and-cereal-support)
   * [underlying_xxx()](#underlying_xxx)
   * [More examples](#more-examples)
@@ -192,6 +193,16 @@ Registries registries{};
 const auto id = registries.create(5.f);             //
 const auto id = registries.create<float>(5.f);      // Those 3 lines are equivalent
 const auto id = registries.of<float>().create(5.f); //
+```
+
+### `to_string()`
+
+Allows you to convert a `reg::Id<T>` or a `reg:AnyId` to their string representation:
+
+```cpp
+auto registry = reg::Registry<float>{};
+const auto id = registry.create(1.f);
+std::cout << reg::to_string(id) << '\n'; // "00020b79-be62-4749-95f9-938b042f3b6e"
 ```
 
 ### Serialization and *cereal* support

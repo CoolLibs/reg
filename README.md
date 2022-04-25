@@ -207,7 +207,7 @@ std::cout << reg::to_string(id) << '\n'; // "00020b79-be62-4749-95f9-938b042f3b6
 
 ### Serialization and *cereal* support
 
-[*cereal* is a serialization library](https://uscilab.github.io/cereal/index.html). *reg* provides out of the box support for it and you can use *cereal* to save and load *reg* types without any efforts. You simply have to `#include <reg/Cereal.hpp>` to import the serialization functions.
+[*cereal* is a serialization library](https://uscilab.github.io/cereal/index.html). *reg* provides out of the box support for it and you can use *cereal* to save and load *reg* types without any efforts. You simply have to `#include <reg/cereal.hpp>` to import the serialization functions.
 
 If you have another way of serializing your objects, see the `underlying_xxx()` section below.
 

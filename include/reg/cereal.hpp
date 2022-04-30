@@ -19,10 +19,12 @@ void load(Archive& ar, uuids::uuid& uuid)
     std::string s;
     ar(s);
     const auto maybe_uuid = uuids::uuid::from_string(s);
-    if (maybe_uuid) {
+    if (maybe_uuid)
+    {
         uuid = *maybe_uuid;
     }
-    else {
+    else
+    {
         throw std::runtime_error{"[load(uuids::uuid)] Couldn't parse uuid: " + s};
     }
 }

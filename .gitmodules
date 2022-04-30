@@ -7,3 +7,6 @@
 [submodule "lib/cpp-typelist"]
 	path = lib/cpp-typelist
 	url = https://github.com/lipk/cpp-typelist
+[submodule "tooling"]
+	path = tooling
+	url = https://github.com/CoolLibs/tooling

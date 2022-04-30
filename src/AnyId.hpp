@@ -10,8 +10,7 @@ public:
     template<typename T>
     AnyId(const Id<T>& id)
         : _uuid{id._uuid}
-    {
-    }
+    {}
 
     friend bool operator==(const AnyId&, const AnyId&) = default;
 

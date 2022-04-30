@@ -28,10 +28,12 @@ public:
         std::shared_lock lock{_mutex};
 
         const auto it = _map.find(id);
-        if (it == _map.end()) {
+        if (it == _map.end())
+        {
             return std::nullopt;
         }
-        else {
+        else
+        {
             return it->second;
         }
     }
@@ -41,10 +43,12 @@ public:
     [[nodiscard]] auto get_ref(const Id<T>& id) const -> const T*
     {
         const auto it = _map.find(id);
-        if (it == _map.end()) {
+        if (it == _map.end())
+        {
             return nullptr;
         }
-        else {
+        else
+        {
             return &it->second;
         }
     }
@@ -54,10 +58,12 @@ public:
     [[nodiscard]] auto get_mutable_ref(const Id<T>& id) -> T*
     {
         auto it = _map.find(id);
-        if (it == _map.end()) {
+        if (it == _map.end())
+        {
             return nullptr;
         }
-        else {
+        else
+        {
             return &it->second;
         }
     }
@@ -71,11 +77,13 @@ public:
         std::unique_lock lock{_mutex};
 
         auto it = _map.find(id);
-        if (it != _map.end()) {
+        if (it != _map.end())
+        {
             it->second = value;
             return true;
         }
-        else {
+        else
+        {
             return false;
         }
     }

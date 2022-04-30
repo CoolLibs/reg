@@ -164,7 +164,8 @@ TEST_CASE("You can iterate over the ids and values in the registry")
 
     std::shared_lock lock{registry.mutex()};
 
-    for (const auto& [id, value] : registry) {
+    for (const auto& [id, value] : registry)
+    {
         assert(id == my_id);       // Can't use doctest's REQUIRE() because of a weird interaction between lambda captures and structured bindings :'( https://github.com/doctest/doctest/issues/279
         assert(value == my_value); // Same
     }
@@ -196,14 +197,16 @@ TEST_CASE("Locking manually")
     {
         std::shared_lock lock{registry.mutex()}; // I only want to read so I can use a shared_lock
 
-        for (const auto& kv : registry) {
+        for (const auto& kv : registry)
+        {
             REQUIRE(kv.second[0] > 0.f); // Some silly thing, this is just an example of how you would read values
         }
     }
     {
         std::unique_lock lock{registry.mutex()}; // I want to modify so I need a unique_lock
 
-        for (auto& kv : registry) {
+        for (auto& kv : registry)
+        {
             kv.second[0] = 1.f;
         }
 

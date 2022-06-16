@@ -59,6 +59,18 @@ public:
     }
 
     template<typename T>
+    auto with_ref(const Id<T>& id, std::function<void(const T&)> callback) const -> bool
+    {
+        return of<T>().with_ref(id, callback);
+    }
+
+    template<typename T>
+    auto with_mutable_ref(const Id<T>& id, std::function<void(T&)> callback) -> bool
+    {
+        return of<T>().with_mutable_ref(id, callback);
+    }
+
+    template<typename T>
     [[nodiscard]] auto create(const T& value) -> Id<T>
     {
         return of<T>().create(value);

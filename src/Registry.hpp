@@ -38,6 +38,66 @@ public:
         }
     }
 
+    /// Thread-safe.
+    /// Sets the value of the object referenced by `id` to `value`.
+    /// Does nothing if the `id` doesn't refer to an object in this registry.
+    /// Returns false iff the object was not found in the registry and this function did nothing.
+    auto set(const Id<T>& id, const T& value) -> bool
+    {
+        std::unique_lock lock{_mutex};
+
+        auto it = _map.find(id);
+        if (it != _map.end())
+        {
+            it->second = value;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /// Thread-safe.
+    /// Applies `callback` to the object referenced by `id`.
+    /// Does nothing if the `id` doesn't refer to an object in this registry.
+    /// Returns false iff the object was not found in the registry and this function did nothing.
+    auto with_ref(const Id<T>& id, std::function<void(const T&)> callback) const -> bool
+    {
+        std::shared_lock lock{_mutex};
+
+        const auto it = _map.find(id);
+        if (it != _map.end())
+        {
+            callback(it->second);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /// Thread-safe.
+    /// Applies `callback` to the object referenced by `id`.
+    /// Does nothing if the `id` doesn't refer to an object in this registry.
+    /// Returns false iff the object was not found in the registry and this function did nothing.
+    auto with_mutable_ref(const Id<T>& id, std::function<void(T&)> callback) -> bool
+    {
+        std::unique_lock lock{_mutex};
+
+        const auto it = _map.find(id);
+        if (it != _map.end())
+        {
+            callback(it->second);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     /// NOT Thread-safe; see the mutex() method to make this thread-safe.
     /// Only use this if you need to avoid the copy that get() would perform.
     [[nodiscard]] auto get_ref(const Id<T>& id) const -> const T*
@@ -65,26 +125,6 @@ public:
         else
         {
             return &it->second;
-        }
-    }
-
-    /// Thread-safe.
-    /// Sets the value of the object referenced by `id` to `value`.
-    /// Does nothing if the `id` doesn't refer to an object in this registry.
-    /// Returns false iff the object was not found in the registry and this function did nothing.
-    auto set(const Id<T>& id, const T& value) -> bool
-    {
-        std::unique_lock lock{_mutex};
-
-        auto it = _map.find(id);
-        if (it != _map.end())
-        {
-            it->second = value;
-            return true;
-        }
-        else
-        {
-            return false;
         }
     }
 

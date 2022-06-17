@@ -46,36 +46,56 @@ public:
         return std::get<internal::type_index_v<reg::Registry<T>, Tuple>>(_registries);
     }
 
+    /// Thread-safe.
+    /// Returns the value of the objet referenced by `id`, or null if the `id` doesn't refer to a an object in this registry.
     template<typename T>
     [[nodiscard]] auto get(const Id<T>& id) const -> std::optional<T>
     {
         return of<T>().get(id);
     }
 
+    /// Thread-safe.
+    /// Sets the value of the object referenced by `id` to `value`.
+    /// Does nothing if the `id` doesn't refer to an object in this registry.
+    /// Returns false iff the object was not found in the registry and this function did nothing.
     template<typename T>
     auto set(const Id<T>& id, const T& value) -> bool
     {
         return of<T>().set(id, value);
     }
 
+    /// Thread-safe.
+    /// Applies `callback` to the object referenced by `id`.
+    /// Does nothing if the `id` doesn't refer to an object in this registry.
+    /// Returns false iff the object was not found in the registry and this function did nothing.
     template<typename T>
     auto with_ref(const Id<T>& id, std::function<void(const T&)> callback) const -> bool
     {
         return of<T>().with_ref(id, callback);
     }
 
+    /// Thread-safe.
+    /// Applies `callback` to the object referenced by `id`.
+    /// Does nothing if the `id` doesn't refer to an object in this registry.
+    /// Returns false iff the object was not found in the registry and this function did nothing.
     template<typename T>
     auto with_mutable_ref(const Id<T>& id, std::function<void(T&)> callback) -> bool
     {
         return of<T>().with_mutable_ref(id, callback);
     }
 
+    /// Thread-safe.
+    /// Inserts a copy of `value` into the registry.
+    /// Returns the id that will then be used to reference the object that has just been created.
     template<typename T>
     [[nodiscard]] auto create(const T& value) -> Id<T>
     {
         return of<T>().create(value);
     }
 
+    /// Thread-safe.
+    /// Destroys the object and removes it from the registry.
+    /// From then on, trying to get an object using `id` is still safe but will return null.
     template<typename T>
     void destroy(const Id<T>& id)
     {

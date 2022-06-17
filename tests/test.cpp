@@ -91,24 +91,69 @@ TEST_CASE("Getting an object")
     SUBCASE("get()")
     {
         const auto value = registry.get(id);
+
         REQUIRE(value);
         REQUIRE(*value == 17.f);
     }
+    SUBCASE("with_ref()")
+    {
+        const bool object_has_been_found_in_registry = registry.with_ref(id, [](const float& value) {
+            REQUIRE(value == 17.f);
+        });
+        REQUIRE(object_has_been_found_in_registry);
+    }
+    SUBCASE("with_mutable_ref()")
+    {
+        const bool object_has_been_found_in_registry = registry.with_mutable_ref(id, [](float& value) {
+            REQUIRE(value == 17.f);
+        });
+        REQUIRE(object_has_been_found_in_registry);
+    }
     SUBCASE("get_ref()")
     {
-        std::shared_lock lock{registry.mutex()};
-
+        std::shared_lock  lock{registry.mutex()};
         const auto* const value = registry.get_ref(id);
+
         REQUIRE(value);
         REQUIRE(*value == 17.f);
     }
     SUBCASE("get_mutable_ref()")
     {
         std::unique_lock lock{registry.mutex()};
+        auto* const      value = registry.get_mutable_ref(id);
 
-        auto* const value = registry.get_mutable_ref(id);
         REQUIRE(value);
         REQUIRE(*value == 17.f);
+    }
+}
+
+TEST_CASE("Setting an object")
+{
+    auto       registry = reg::Registry<float>{};
+    const auto id       = registry.create(17.f);
+
+    SUBCASE("set()")
+    {
+        const bool success = registry.set(id, 13.f);
+        REQUIRE(success);
+        REQUIRE(*registry.get(id) == 13.f);
+    }
+    SUBCASE("with_mutable_ref()")
+    {
+        const bool success = registry.with_mutable_ref(id, [](float& value) {
+            value = 13.f;
+        });
+        REQUIRE(success);
+        REQUIRE(*registry.get(id) == 13.f);
+    }
+    SUBCASE("get_mutable_ref()")
+    {
+        {
+            std::unique_lock lock{registry.mutex()};
+            auto* const      value = registry.get_mutable_ref(id);
+            *value                 = 13.f;
+        }
+        REQUIRE(*registry.get(id) == 13.f);
     }
 }
 

@@ -1,6 +1,6 @@
-# *reg*, a registry library
+# _reg_, a registry library
 
-The *reg* library gives an identity to your value-types, turning them into objects stored in a `reg::Registry`. You can reference and access your objects through a `reg::Id`.
+The _reg_ library gives an identity to your value-types, turning them into objects stored in a `reg::Registry`. You can reference and access your objects through a `reg::Id`.
 
 You can see `reg::Id`s as references which will never get invalidated, unless you explicitly ask the registry to destroy the object. Even after an object has been destroyed it is safe to query the registry for the destroyed object through its id: the registry will simply return null (`nullptr` or `std::nullopt`) and you will have to handle the fact that the object no longer exists. Basically this is like a reference which knows whether it is dangling or not and will never let you read garbage memory.
 
@@ -10,25 +10,25 @@ This library allows you to manually control the lifetime of objects and to keep 
 
 - [Use case](#use-case)
 - [Tutorial](#tutorial)
-  * [Creating an object](#creating-an-object)
-  * [Accessing an object](#accessing-an-object)
-  * [Modifying an object](#modifying-an-object)
-  * [Destroying an object](#destroying-an-object)
-  * [Iterating over all the objects](#iterating-over-all-the-objects)
-  * [Managing the lifetime of objects](#managing-the-lifetime-of-objects)
-  * [Thread safety](#thread-safety)
-  * [AnyId](#anyid)
-  * [Registries](#registries)
-  * [to_string()](#to_string)
-  * [Serialization and *cereal* support](#serialization-and-cereal-support)
-  * [underlying_xxx()](#underlying_xxx)
-  * [More examples](#more-examples)
+  - [Creating an object](#creating-an-object)
+  - [Accessing an object](#accessing-an-object)
+  - [Modifying an object](#modifying-an-object)
+  - [Destroying an object](#destroying-an-object)
+  - [Iterating over all the objects](#iterating-over-all-the-objects)
+  - [Managing the lifetime of objects](#managing-the-lifetime-of-objects)
+  - [Thread safety](#thread-safety)
+  - [AnyId](#anyid)
+  - [Registries](#registries)
+  - [to_string()](#to_string)
+  - [Serialization and _cereal_ support](#serialization-and-cereal-support)
+  - [underlying_xxx()](#underlying_xxx)
+  - [More examples](#more-examples)
 - [Notes](#notes)
-  * [Why can't I just use native pointers (*) or references (&)?](#why-can-t-i-just-use-native-pointers-----or-references-----)
-  * [We don't provide automatic lifetime management](#we-don-t-provide-automatic-lifetime-management)
-  * [Performance is not our main concern](#performance-is-not-our-main-concern)
+  - [Why can't I just use native pointers (\*) or references (&)?](#why-can-t-i-just-use-native-pointers-----or-references-----)
+  - [We don't provide automatic lifetime management](#we-don-t-provide-automatic-lifetime-management)
+  - [Performance is not our main concern](#performance-is-not-our-main-concern)
 - [Future developments](#future-developments)
-  * [`for_each` functions](#-for-each--functions)
+  - [`for_each` functions](#for_each-functions)
 
 ## Use case
 
@@ -37,18 +37,21 @@ This library was designed for this specific use case:
 **_You want to create user-facing objects that will be referenceable across the application, as in Blender's Scene Collection:_**
 
 ![](./docs/img/blender-hierarchy.png)
-> The *Cube*'s constraint references the *MyPosition* object. We want this reference to live forever (or at least until the user changes it).
+
+> The _Cube_'s constraint references the _MyPosition_ object. We want this reference to live forever (or at least until the user changes it).
 
 ## Tutorial
 
 ### Creating an object
 
 A `reg::Registry` stores values of a given type. For example you can create a
+
 ```cpp
 reg::Registry<float> registry{};
 ```
 
 You can then create objects in the registry:
+
 ```cpp
 reg::Id<float> id = registry.create(5.f);
 ```
@@ -71,7 +74,22 @@ if (maybe_value) // Check that `maybe_value` contains a value
 }
 ```
 
-If you cannot afford to pay the cost of the copy (for example when storing big `std::vector`s in your registry) you can use `get_ref()` instead:
+If you cannot afford to pay the cost of the copy (for example when storing big `std::vector`s in your registry) you can use `with_ref()` instead:
+
+```cpp
+const bool success = registry.with_ref(id, [](const float& value) { // The callback will only be called if the id was found in the registry
+    std::cout << "My value is "
+                << std::to_string(value)
+                << '\n';
+});
+
+if (!success) // You can check if with_ref() successfully found the id
+{
+    std::cout << "Object not found!\n";
+}
+```
+
+A third-alternative is to use `get_ref()`, but it is not recommended because you have to handle the thread-safety manually:
 
 ```cpp
 {
@@ -98,7 +116,20 @@ registry.set(id, 22.f);
 
 If the object was not present in the registry `set()` will do nothing and return `false`; otherwise it will set the value and return `true`.
 
-If your objects are big and you don't want to perform a full assignment (for example if you are storing `std::vector`s and only want to modify one element in one vector) you can use `get_mutable_ref()` instead:
+If your objects are big and you don't want to perform a full assignment (for example if you are storing `std::vector`s and only want to modify one element in one vector) you can use `with_mutable_ref()` instead:
+
+```cpp
+const bool success = registry.with_mutable_ref(id, [](float& value) { // The callback will only be called if the id was found in the registry
+    value = 22.f;
+});
+
+if (!success) // You can check if with_mutable_ref() successfully found the id
+{
+    std::cout << "Object not found!\n";
+}
+```
+
+A third-alternative is to use `get_mutable_ref()`, but it is not recommended because you have to handle the thread-safety manually:
 
 ```cpp
 {
@@ -128,16 +159,17 @@ You can iterate over all the objects in the registry, but the order is not guara
 ```cpp
 {
     std::shared_lock lock{registry.mutex()}; // I only want to read so I can use a shared_lock
-    for (const auto&[id, value] : registry) 
+    for (const auto&[id, value] : registry)
     {
         // ...
     }
 }
 ```
+
 ```cpp
 {
     std::unique_lock lock{registry.mutex()}; // I want to modify so I need a unique_lock
-    for (auto&[id, value] : registry) 
+    for (auto&[id, value] : registry)
     {
         // ...
     }
@@ -146,8 +178,8 @@ You can iterate over all the objects in the registry, but the order is not guara
 
 ### Managing the lifetime of objects
 
-:warning: **Important:** You have to manually delete (using `registry.destroy(id);`) the objects that you no longer need. You will get memory leaks if you forget to do that.<br/>
-This should not be a big deal if you use this library to store user-facing objects: the deletion of the objects will be tied to a user clicking *delete* in the UI, and you will just have to call `registry.destroy(id);` whenever this happens.
+⚠️ **Important:** You have to manually delete (using `registry.destroy(id);`) the objects that you no longer need. You will get memory leaks if you forget to do that.<br/>
+This should not be a big deal if you use this library to store user-facing objects: the deletion of the objects will be tied to a user clicking _delete_ in the UI, and you will just have to call `registry.destroy(id);` whenever this happens.
 
 ### Thread safety
 
@@ -155,7 +187,7 @@ This should not be a big deal if you use this library to store user-facing objec
 
 **Most operations on a `reg::Registry` are thread-safe.** Internally we use a `std::shared_mutex` to lock the registry while we do some operations on it. The fact that the mutex is shared means that multiple threads can read from the registry at the same time, but locking will occur when you try to modify the registry or one of the objects it stores.
 
-We cannot do the locking automatically in the cases where we hand out references to objects in the registry, because we do not control how long those references will live. In those cases it is *your* responsibility to care about thread-safety. You can use `mutex()` to get the mutex and lock it yourself.<br/>
+We cannot do the locking automatically in the cases where we hand out references to objects in the registry, because we do not control how long those references will live. In those cases it is _your_ responsibility to care about thread-safety. You can use `mutex()` to get the mutex and lock it yourself.<br/>
 You should only use the references while your are locking the mutex: once the lock is gone any thread could invalidate your reference at any time. (Or alternatively you can make sure that only one thread ever accesses your registry, which is another way of solving the thread-safety problem.)
 
 Those "unsafe" functions are useful if you cannot afford to pay the cost of the copy in `get()` or the assignment in `set()`, but you should prefer the safe ones in all the other cases, which should be most cases.
@@ -177,7 +209,7 @@ assert(id == any_id); // They can be compared
 `reg::Registries` is a type that holds a set of registries of different types:
 
 ```cpp
-    using Registries = reg::Registries<int, float, double>; // Creates 3 registries: 1 for int, 
+    using Registries = reg::Registries<int, float, double>; // Creates 3 registries: 1 for int,
     Registries registries{};                                // 1 for float and 1 for double
 
     const reg::Registry<int>& const_registry = registries.of<int>(); // You can access each of the registries
@@ -205,9 +237,9 @@ const auto id = registry.create(1.f);
 std::cout << reg::to_string(id) << '\n'; // "00020b79-be62-4749-95f9-938b042f3b6e"
 ```
 
-### Serialization and *cereal* support
+### Serialization and _cereal_ support
 
-[*cereal* is a serialization library](https://uscilab.github.io/cereal/index.html). *reg* provides out of the box support for it and you can use *cereal* to save and load *reg* types without any efforts. You simply have to `#include <reg/cereal.hpp>` to import the serialization functions.
+[_cereal_ is a serialization library](https://uscilab.github.io/cereal/index.html). _reg_ provides out of the box support for it and you can use _cereal_ to save and load _reg_ types without any efforts. You simply have to `#include <reg/cereal.hpp>` to import the serialization functions.
 
 If you have another way of serializing your objects, see the `underlying_xxx()` section below.
 
@@ -224,7 +256,7 @@ Check out [our tests](./tests/test.cpp) for more examples of how to use the libr
 
 ## Notes
 
-### Why can't I just use native pointers (*) or references (&)?
+### Why can't I just use native pointers (\*) or references (&)?
 
 Pointers and references are tied to an address in memory, which is something that can change. For example if you close and restart your application your objects will likely not be created in the same location in memory as they were before, so if you saved a pointer and try to reuse it it will likely be pointing to garbage memory now.
 

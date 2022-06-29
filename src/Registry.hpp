@@ -59,6 +59,16 @@ public:
     }
 
     /// Thread-safe.
+    /// Returns iff `id` references an object in the registry.
+    [[nodiscard]] auto contains(const Id<T>& id) const -> bool
+    {
+        std::shared_lock lock{_mutex};
+
+        const auto it = _map.find(id);
+        return it != _map.end();
+    }
+
+    /// Thread-safe.
     /// Applies `callback` to the object referenced by `id`.
     /// Does nothing if the `id` doesn't refer to an object in this registry.
     /// Returns false iff the object was not found in the registry and this function did nothing.

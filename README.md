@@ -14,6 +14,7 @@ This library allows you to manually control the lifetime of objects and to keep 
   - [Accessing an object](#accessing-an-object)
   - [Modifying an object](#modifying-an-object)
   - [Destroying an object](#destroying-an-object)
+  - [Checking for the existence of an object](#checking-for-the-existence-of-an-object)
   - [Iterating over all the objects](#iterating-over-all-the-objects)
   - [Managing the lifetime of objects](#managing-the-lifetime-of-objects)
   - [Thread safety](#thread-safety)
@@ -151,6 +152,17 @@ registry.destroy(id);
 ```
 
 You can always call `destroy()`, even if the id isn't valid. This will remove the object from the registry (if it was there in the first place) and call its destructor.
+
+### Checking for the existence of an object
+
+```cpp
+if (registry.contains(id))
+{
+    // ...
+}
+```
+
+`contains` returns true if and only if the registry contains an object referenced by `id`.
 
 ### Iterating over all the objects
 

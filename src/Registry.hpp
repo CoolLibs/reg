@@ -13,12 +13,12 @@ public:
     /// The type of values stored in this registry.
     using ValueType = T;
 
-    Registry()                    = default;
-    ~Registry()                   = default;
-    Registry(Registry&&) noexcept = default;
+    Registry()                               = default;
+    ~Registry()                              = default;
+    Registry(Registry&&) noexcept            = default;
     Registry& operator=(Registry&&) noexcept = default;
 
-    Registry(const Registry&) = delete;            // This class is non-copyable
+    Registry(const Registry&)            = delete; // This class is non-copyable
     Registry& operator=(const Registry&) = delete; // because it is the unique owner of the objects it stores
 
     /// Thread-safe.

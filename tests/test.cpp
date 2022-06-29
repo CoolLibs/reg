@@ -9,8 +9,11 @@ auto size(const reg::Registry<T>& registry)
     std::shared_lock lock{registry.mutex()}; // Not really needed since our tests are single-threaded, but it is an opportunity
                                              // to show what a thread-safe `size(Registry)` function would look like.
     return static_cast<size_t>(
-        std::distance(std::begin(registry),
-                      std::end(registry)));
+        std::distance(
+            std::begin(registry),
+            std::end(registry)
+        )
+    );
 }
 
 TEST_CASE("Querying a registry with an uninitialized id returns a null object")

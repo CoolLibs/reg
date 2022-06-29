@@ -11,19 +11,14 @@ namespace internal {
 template<class T, std::size_t I, class Tuple>
 constexpr bool match_v = std::is_same_v<T, std::tuple_element_t<I, Tuple>>;
 
-template<class T, class Tuple,
-         class Idxs = std::make_index_sequence<std::tuple_size_v<Tuple>>>
+template<class T, class Tuple, class Idxs = std::make_index_sequence<std::tuple_size_v<Tuple>>>
 struct type_index;
 
-template<class T, template<class...> class Tuple, class... Args,
-         std::size_t... Is>
+template<class T, template<class...> class Tuple, class... Args, std::size_t... Is>
 struct type_index<T, Tuple<Args...>, std::index_sequence<Is...>>
-    : std::integral_constant<std::size_t,
-                             ((Is * match_v<T, Is, Tuple<Args...>>)+... + 0)> {
-    static_assert(2 > (match_v<T, Is, Tuple<Args...>> + ... + 0),
-                  "T was declared multiple types in Registries");
-    static_assert(0 != (match_v<T, Is, Tuple<Args...>> + ... + 0),
-                  "T was not declared as one of the types of Registries");
+    : std::integral_constant<std::size_t, ((Is * match_v<T, Is, Tuple<Args...>>)+... + 0)> {
+    static_assert(2 > (match_v<T, Is, Tuple<Args...>> + ... + 0), "T was declared multiple types in Registries");
+    static_assert(0 != (match_v<T, Is, Tuple<Args...>> + ... + 0), "T was not declared as one of the types of Registries");
 };
 
 template<class T, class Tuple>

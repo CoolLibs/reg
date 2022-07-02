@@ -8,7 +8,6 @@ target_include_directories(reg INTERFACE include)
 target_include_directories(reg INTERFACE lib) # To find cpp-typelist
 
 set(UUID_BUILD_TESTS      OFF CACHE BOOL "")
-set(UUID_SYSTEM_GENERATOR ON  CACHE BOOL "")
 set(UUID_TIME_GENERATOR   OFF CACHE BOOL "")
 set(UUID_USING_CXX20_SPAN ON  CACHE BOOL "")
 add_subdirectory(lib/stduuid)

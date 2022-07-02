@@ -1,11 +1,32 @@
 #pragma once
 #include <uuid.h>
+#include <array>
 #include <optional>
+#include <random>
 #include <shared_mutex>
 #include <unordered_map>
 #include "Id.hpp"
 
 namespace reg {
+
+namespace internal {
+
+inline auto create_random_generator()
+{
+    std::random_device rd;
+    auto               seed_data = std::array<int, std::mt19937::state_size>{};
+    std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+    std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+    return std::mt19937{seq};
+}
+
+inline auto generate_uuid() -> uuids::uuid
+{
+    static thread_local auto generator{create_random_generator()};
+    return uuids::uuid_random_generator{generator}();
+}
+
+} // namespace internal
 
 template<typename T>
 class Registry {
@@ -143,8 +164,7 @@ public:
     /// Returns the id that will then be used to reference the object that has just been created.
     [[nodiscard]] auto create(const T& value) -> Id<T>
     {
-        const auto id = Id<T>{
-            uuids::uuid_system_generator{}()}; // This should be thread-safe on all OSes // Creating a uuid_system_generator is cheap, the class is empty.
+        const auto id = Id<T>{internal::generate_uuid()};
 
         std::unique_lock lock{_mutex};
 

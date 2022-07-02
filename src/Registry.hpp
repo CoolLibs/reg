@@ -182,6 +182,12 @@ public:
         _map.erase(id);
     }
 
+    /// Thread-safe.
+    auto is_empty() const -> bool
+    {
+        return _map.empty();
+    }
+
     /// NOT Thread-safe; see the mutex() method to make this thread-safe.
     [[nodiscard]] auto begin() { return _map.begin(); }
     /// NOT Thread-safe; see the mutex() method to make this thread-safe.

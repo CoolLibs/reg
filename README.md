@@ -21,6 +21,7 @@ This library allows you to manually control the lifetime of objects and to keep 
   - [AnyId](#anyid)
   - [Registries](#registries)
   - [to_string()](#to_string)
+  - [is_empty()](#is_empty)
   - [Serialization and _cereal_ support](#serialization-and-cereal-support)
   - [underlying_xxx()](#underlying_xxx)
   - [More examples](#more-examples)
@@ -247,6 +248,15 @@ Allows you to convert a `reg::Id<T>` or a `reg:AnyId` to their string representa
 auto registry = reg::Registry<float>{};
 const auto id = registry.create(1.f);
 std::cout << reg::to_string(id) << '\n'; // "00020b79-be62-4749-95f9-938b042f3b6e"
+```
+
+### `is_empty()`
+
+```cpp
+if (registry.is_empty())
+{
+    // ...
+}
 ```
 
 ### Serialization and _cereal_ support

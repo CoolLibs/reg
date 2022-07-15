@@ -267,6 +267,11 @@ public:
         }
     }
 
+    auto empty() const -> bool
+    {
+        return _map.empty();
+    }
+
 private:
     std::vector<std::pair<Key, Value>> _map;
 };

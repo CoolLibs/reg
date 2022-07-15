@@ -303,3 +303,13 @@ TEST_CASE_TEMPLATE("Registries expose the thread-safe functions of the underlyin
         REQUIRE(!registries.get(id));
     }
 }
+
+TEST_CASE_TEMPLATE("is_empty()", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
+{
+    auto registry = Registry{};
+    CHECK(registry.is_empty());
+    const auto id = registry.create(3.f);
+    CHECK(!registry.is_empty());
+    registry.destroy(id);
+    CHECK(registry.is_empty());
+}

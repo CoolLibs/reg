@@ -28,19 +28,19 @@ inline auto generate_uuid() -> uuids::uuid
 
 } // namespace internal
 
-template<typename T>
-class Registry {
+template<typename T, typename Map>
+class RegistryImpl {
 public:
     /// The type of values stored in this registry.
     using ValueType = T;
 
-    Registry()                               = default;
-    ~Registry()                              = default;
-    Registry(Registry&&) noexcept            = default;
-    Registry& operator=(Registry&&) noexcept = default;
+    RegistryImpl()                                   = default;
+    ~RegistryImpl()                                  = default;
+    RegistryImpl(RegistryImpl&&) noexcept            = default;
+    RegistryImpl& operator=(RegistryImpl&&) noexcept = default;
 
-    Registry(const Registry&)            = delete; // This class is non-copyable
-    Registry& operator=(const Registry&) = delete; // because it is the unique owner of the objects it stores
+    RegistryImpl(const RegistryImpl&)            = delete; // This class is non-copyable
+    RegistryImpl& operator=(const RegistryImpl&) = delete; // because it is the unique owner of the objects it stores
 
     /// Thread-safe.
     /// Returns the value of the objet referenced by `id`, or null if the `id` doesn't refer to a an object in this registry.
@@ -211,8 +211,71 @@ public:
     auto underlying_container() -> std::unordered_map<Id<T>, T>& { return _map; }
 
 private:
-    std::unordered_map<Id<T>, T> _map;
-    mutable std::shared_mutex    _mutex;
+    Map                       _map;
+    mutable std::shared_mutex _mutex;
 };
+
+namespace internal {
+template<typename Key, typename Value>
+class OrderPreservingMap {
+public:
+    auto begin() const { return _map.begin(); }
+    auto begin() { return _map.begin(); }
+    auto end() const { return _map.end(); }
+    auto end() { return _map.end(); }
+
+    auto find(const Key& key) const
+    {
+        for (auto it = begin(); it != end(); ++it)
+        {
+            if (it->first == key)
+            {
+                return it;
+            }
+        }
+        return end();
+    }
+
+    auto find(const Key& key)
+    {
+        for (auto it = begin(); it != end(); ++it)
+        {
+            if (it->first == key)
+            {
+                return it;
+            }
+        }
+        return end();
+    }
+
+    void insert(const std::pair<Key, Value>& key_value_pair)
+    {
+        _map.push_back(key_value_pair);
+    }
+
+    void insert(std::pair<Key, Value>&& key_value_pair)
+    {
+        _map.push_back(std::move(key_value_pair));
+    }
+
+    void erase(const Key& key)
+    {
+        auto it = find(key);
+        if (it != end())
+        {
+            _map.erase(it);
+        }
+    }
+
+private:
+    std::vector<std::pair<Key, Value>> _map;
+};
+} // namespace internal
+
+template<typename T>
+using Registry = RegistryImpl<T, std::unordered_map<Id<T>, T>>;
+
+template<typename T>
+using OrderedRegistry = RegistryImpl<T, internal::OrderPreservingMap<Id<T>, T>>;
 
 } // namespace reg

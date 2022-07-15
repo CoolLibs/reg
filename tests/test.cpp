@@ -3,8 +3,8 @@
 #include <cassert>
 #include <reg/reg.hpp>
 
-template<typename T>
-auto size(const reg::Registry<T>& registry)
+template<typename Registry>
+auto size(const Registry& registry)
 {
     std::shared_lock lock{registry.mutex()}; // Not really needed since our tests are single-threaded, but it is an opportunity
                                              // to show what a thread-safe `size(Registry)` function would look like.
@@ -16,17 +16,17 @@ auto size(const reg::Registry<T>& registry)
     );
 }
 
-TEST_CASE("Querying a registry with an uninitialized id returns a null object")
+TEST_CASE_TEMPLATE("Querying a registry with an uninitialized id returns a null object", Registry, reg::Registry<int>, reg::OrderedRegistry<int>)
 {
-    auto registry = reg::Registry<int>{};
+    auto registry = Registry{};
     REQUIRE(!registry.get(reg::Id<int>{}));
     REQUIRE(!registry.get_ref(reg::Id<int>{}));
     REQUIRE(!registry.get_mutable_ref(reg::Id<int>{}));
 }
 
-TEST_CASE("Trying to erase an uninitialized id is valid and does nothing")
+TEST_CASE_TEMPLATE("Trying to erase an uninitialized id is valid and does nothing", Registry, reg::Registry<char>, reg::OrderedRegistry<char>)
 {
-    auto       registry = reg::Registry<char>{};
+    auto       registry = Registry{};
     const auto idA      = registry.create('a');
     const auto idB      = registry.create('b');
     const auto idC      = registry.create('c');
@@ -39,10 +39,10 @@ TEST_CASE("Trying to erase an uninitialized id is valid and does nothing")
     REQUIRE(*registry.get(idC) == 'c');
 }
 
-TEST_CASE("IDs are unique, even across registries")
+TEST_CASE_TEMPLATE("IDs are unique, even across registries", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
-    auto       registry1 = reg::Registry<float>{};
-    auto       registry2 = reg::Registry<float>{};
+    auto       registry1 = Registry{};
+    auto       registry2 = Registry{};
     const auto id11      = registry1.create(2.f);
     const auto id12      = registry1.create(2.f);
     const auto id13      = registry1.create(1.f);
@@ -69,9 +69,9 @@ TEST_CASE("IDs are unique, even across registries")
     REQUIRE(id13 != id23);
 }
 
-TEST_CASE("An AnyId is equal to the Id it was created from")
+TEST_CASE_TEMPLATE("An AnyId is equal to the Id it was created from", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
-    auto       registry = reg::Registry<float>{};
+    auto       registry = Registry{};
     const auto id1      = registry.create(1.f);
     const auto id2      = registry.create(2.f);
     const auto any_id1  = reg::AnyId{id1};
@@ -86,9 +86,9 @@ TEST_CASE("An AnyId is equal to the Id it was created from")
     REQUIRE(!(any_id1 == any_id2));
 }
 
-TEST_CASE("Getting an object")
+TEST_CASE_TEMPLATE("Getting an object", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
-    auto       registry = reg::Registry<float>{};
+    auto       registry = Registry{};
     const auto id       = registry.create(17.f);
 
     SUBCASE("get()")
@@ -130,9 +130,9 @@ TEST_CASE("Getting an object")
     }
 }
 
-TEST_CASE("Setting an object")
+TEST_CASE_TEMPLATE("Setting an object", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
-    auto       registry = reg::Registry<float>{};
+    auto       registry = Registry{};
     const auto id       = registry.create(17.f);
 
     SUBCASE("set()")
@@ -160,9 +160,9 @@ TEST_CASE("Setting an object")
     }
 }
 
-TEST_CASE("Objects can be created, retrieved and destroyed")
+TEST_CASE_TEMPLATE("Objects can be created, retrieved and destroyed", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
-    auto registry = reg::Registry<float>{};
+    auto registry = Registry{};
 
     const auto id1 = registry.create(153.f);
     REQUIRE(size(registry) == 1);
@@ -204,9 +204,9 @@ TEST_CASE("Objects can be created, retrieved and destroyed")
     }
 }
 
-TEST_CASE("You can iterate over the ids and values in the registry")
+TEST_CASE_TEMPLATE("You can iterate over the ids and values in the registry", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
-    auto       registry = reg::Registry<float>{};
+    auto       registry = Registry{};
     const auto my_value = 1.f;
     const auto my_id    = registry.create(my_value);
 
@@ -219,9 +219,9 @@ TEST_CASE("You can iterate over the ids and values in the registry")
     }
 }
 
-TEST_CASE("Locking manually")
+TEST_CASE_TEMPLATE("Locking manually", Registry, reg::Registry<std::vector<float>>, reg::OrderedRegistry<std::vector<float>>)
 {
-    auto       registry = reg::Registry<std::vector<float>>{};                 // Our registry is storing big objects
+    auto       registry = Registry{};                                          // Our registry is storing big objects
     const auto id       = registry.create(std::vector<float>(10000000, 15.f)); // so we will want to avoid copying them
     {
         std::shared_lock lock{registry.mutex()}; // I only want to read so I can use a shared_lock
@@ -290,7 +290,7 @@ TEST_CASE("Registries allows you to access the underlying registries by type")
     }
 }
 
-TEST_CASE("Registries expose the thread-safe functions of the underlying registries")
+TEST_CASE_TEMPLATE("Registries expose the thread-safe functions of the underlying registries", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
     using Registries = reg::Registries<float, int, double>;
     Registries registries{};

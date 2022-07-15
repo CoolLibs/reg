@@ -16,8 +16,8 @@ public:
     auto underlying_uuid() const -> const uuids::uuid& { return _uuid; }
 
 private:
-    template<typename SomeType>
-    friend class Registry;
+    template<typename SomeType, typename Map>
+    friend class RegistryImpl;
     friend class AnyId;
     friend std::hash<Id<T>>;
 

@@ -167,7 +167,8 @@ if (registry.contains(id))
 
 ### Iterating over all the objects
 
-You can iterate over all the objects in the registry, but the order is not guaranteed. This is why you should probably maintain your own `std::vector<reg::Id<T>>` to have the control over the order the objects will be displayed in in your UI for example.
+You can iterate over all the objects in the registry, but the order is not guaranteed. This is why you should probably maintain your own `std::vector<reg::Id<T>>` to have the control over the order the objects will be displayed in in your UI for example.<br/>
+(**NB:** If you want the guarantee that the objects will keep the order they were created in, you can use a `reg::OrderedRegistry` instead of a `reg::Registry`. The API is the same, but it uses a `std::vector` internally instead of a `std::unordered_map`.)
 
 ```cpp
 {

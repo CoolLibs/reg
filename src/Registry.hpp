@@ -207,8 +207,8 @@ public:
     /// See https://stackoverflow.com/a/46050121/15432269 for more details about shared mutexes.
     [[nodiscard]] auto mutex() const -> std::shared_mutex& { return _mutex; }
 
-    auto underlying_container() const -> const std::unordered_map<Id<T>, T>& { return _map; }
-    auto underlying_container() -> std::unordered_map<Id<T>, T>& { return _map; }
+    auto underlying_container() const -> const Map& { return _map; }
+    auto underlying_container() -> Map& { return _map; }
 
 private:
     Map                       _map;

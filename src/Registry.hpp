@@ -185,6 +185,7 @@ public:
     /// Thread-safe.
     auto is_empty() const -> bool
     {
+        std::shared_lock lock{_mutex};
         return _map.empty();
     }
 

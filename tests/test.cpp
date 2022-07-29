@@ -313,3 +313,46 @@ TEST_CASE_TEMPLATE("is_empty()", Registry, reg::Registry<float>, reg::OrderedReg
     registry.destroy(id);
     CHECK(registry.is_empty());
 }
+
+// TODO(JF) Make this a tempalted case on all the registries
+TEST_CASE("ScopedId")
+{
+    auto registry = reg::Registry<float>{};
+    REQUIRE(registry.is_empty());
+
+    SUBCASE("The destructor of ScopedId automatically deletes the id it was responsible for.")
+    {
+        {
+            const auto scoped_id = reg::ScopedId{registry, 3.f};
+            REQUIRE(*registry.get(scoped_id) == 3.f);
+        }
+        CHECK(registry.is_empty());
+    }
+
+    SUBCASE("Move-assigning a ScopedId transfers responsibility.")
+    {
+        {
+            auto final_scope = reg::ScopedId<float>{};
+            {
+                auto tmp_scope = reg::ScopedId{registry, 3.f};
+                REQUIRE(*registry.get(tmp_scope) == 3.f);
+                final_scope = std::move(tmp_scope);
+            } // Destructor of tmp_scope is called but shouldn't do anything
+            REQUIRE(*registry.get(final_scope) == 3.f);
+        } // Destructor of final_scope is called and should destroy the id
+        CHECK(registry.is_empty());
+    }
+
+    SUBCASE("Move-constructing a ScopedId transfers responsibility.")
+    {
+        {
+            const auto final_scope = [&]() {
+                auto tmp_scope = reg::ScopedId{registry, 3.f}; // Can't be const if we want to move from it
+                REQUIRE(*registry.get(tmp_scope) == 3.f);
+                return std::move(tmp_scope); // Force a move, don't rely on copy-elision as this is not what we want to test
+            }();                             // Destructor of tmp_scope is called but shouldn't do anything
+            REQUIRE(*registry.get(final_scope) == 3.f);
+        } // Destructor of final_scope is called and should destroy the id
+        CHECK(registry.is_empty());
+    }
+}

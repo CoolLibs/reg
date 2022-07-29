@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <cassert>
 #include <reg/reg.hpp>
+#include <tuple>
 
 template<typename Registry>
 auto size(const Registry& registry)
@@ -314,16 +315,22 @@ TEST_CASE_TEMPLATE("is_empty()", Registry, reg::Registry<float>, reg::OrderedReg
     CHECK(registry.is_empty());
 }
 
-// TODO(JF) Make this a tempalted case on all the registries
-TEST_CASE("ScopedId")
+TEST_CASE_TEMPLATE(
+    "ScopedId", RegistryAndId,
+    std::tuple<reg::Registry<float>, reg::ScopedId<float>>, // We use this tuple trick to run the test on pairs of types (the Registry and the corresponding ScopedId)
+    std::tuple<reg::OrderedRegistry<float>, reg::ScopedId_Ordered<float>>
+)
 {
-    auto registry = reg::Registry<float>{};
+    using Registry = std::tuple_element<0, RegistryAndId>::type;
+    using ScopedId = std::tuple_element<1, RegistryAndId>::type;
+
+    auto registry = Registry{};
     REQUIRE(registry.is_empty());
 
     SUBCASE("The destructor of ScopedId automatically deletes the id it was responsible for.")
     {
         {
-            const auto scoped_id = reg::ScopedId{registry, 3.f};
+            const auto scoped_id = ScopedId{registry, 3.f};
             REQUIRE(*registry.get(scoped_id) == 3.f);
         }
         CHECK(registry.is_empty());
@@ -338,9 +345,9 @@ TEST_CASE("ScopedId")
     SUBCASE("Move-assigning a ScopedId transfers responsibility.")
     {
         {
-            auto final_scope = reg::ScopedId<float>{};
+            auto final_scope = ScopedId{};
             {
-                auto tmp_scope = reg::ScopedId{registry, 3.f};
+                auto tmp_scope = ScopedId{registry, 3.f};
                 REQUIRE(*registry.get(tmp_scope) == 3.f);
                 final_scope = std::move(tmp_scope);
             } // Destructor of tmp_scope is called but shouldn't do anything
@@ -353,7 +360,7 @@ TEST_CASE("ScopedId")
     {
         {
             const auto final_scope = [&]() {
-                auto tmp_scope = reg::ScopedId{registry, 3.f}; // Can't be const if we want to move from it
+                auto tmp_scope = ScopedId{registry, 3.f}; // Can't be const if we want to move from it
                 REQUIRE(*registry.get(tmp_scope) == 3.f);
                 return std::move(tmp_scope); // Force a move, don't rely on copy-elision as this is not what we want to test
             }();                             // Destructor of tmp_scope is called but shouldn't do anything

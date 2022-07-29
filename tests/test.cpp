@@ -323,7 +323,7 @@ TEST_CASE("ScopedId")
     SUBCASE("The destructor of ScopedId automatically deletes the id it was responsible for.")
     {
         {
-            const auto scoped_id = reg::ScopedId{registry, 3.f};
+            const auto scoped_id = reg::ScopedId<float>{registry, 3.f};
             REQUIRE(*registry.get(scoped_id) == 3.f);
         }
         CHECK(registry.is_empty());

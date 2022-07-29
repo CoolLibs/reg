@@ -282,6 +282,9 @@ private:
 } // namespace internal
 
 template<typename T>
+concept RegistryC = true;
+
+template<typename T>
 using Registry = RegistryImpl<T, std::unordered_map<Id<T>, T>>;
 
 template<typename T>

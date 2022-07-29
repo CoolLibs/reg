@@ -329,6 +329,12 @@ TEST_CASE("ScopedId")
         CHECK(registry.is_empty());
     }
 
+#pragma warning(disable : 4068) // "unknown pragma"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpessimizing-move"
+#pragma GCC diagnostic   push
+#pragma GCC diagnostic   ignored "-Wpessimizing-move"
+
     SUBCASE("Move-assigning a ScopedId transfers responsibility.")
     {
         {
@@ -355,4 +361,7 @@ TEST_CASE("ScopedId")
         } // Destructor of final_scope is called and should destroy the id
         CHECK(registry.is_empty());
     }
+
+#pragma GCC diagnostic   pop
+#pragma clang diagnostic pop
 }

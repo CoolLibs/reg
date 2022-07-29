@@ -4,7 +4,7 @@ project(reg-tests)
 add_executable(${PROJECT_NAME} test.cpp)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
-if (MSVC)
+if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /WX /W4)
 else()
     target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra -Wpedantic -pedantic-errors -Wconversion -Wsign-conversion)

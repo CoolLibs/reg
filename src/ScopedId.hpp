@@ -15,7 +15,7 @@ public:
     ScopedId() = default;
 
     explicit ScopedId(Registry<T>& registry, const T& value = {})
-        : _registry{registry}
+        : _registry{&registry}
         , _id{registry.create(value)}
     {}
 
@@ -23,7 +23,7 @@ public:
     {
         if (_registry)
         {
-            _registry->get().destroy(_id);
+            _registry->destroy(_id);
         }
     }
 
@@ -31,19 +31,19 @@ public:
     ScopedId& operator=(const ScopedId&) = delete;
 
     ScopedId(ScopedId&& rhs) noexcept
-        : _id{rhs._id}
-        , _registry{rhs._registry}
+        : _registry{rhs._registry}
+        , _id{rhs._id}
     {
-        rhs._registry.reset();
+        rhs._registry = nullptr;
     }
 
     ScopedId& operator=(ScopedId&& rhs) noexcept
     {
         if (this != &rhs)
         {
-            _id       = rhs._id;
-            _registry = rhs._registry;
-            rhs._registry.reset();
+            _id           = rhs._id;
+            _registry     = rhs._registry;
+            rhs._registry = nullptr;
         }
 
         return *this;

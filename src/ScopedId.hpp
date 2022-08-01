@@ -58,7 +58,7 @@ private:
 } // namespace internal
 
 /// Wraps an ID in a RAII class that will destroy the corresponding object automatically.
-/// This requires that you guarantee that the adress of the `registry` won't change during the lifetime of this `ScopedId`
+/// This requires that you guarantee that the address of the `registry` won't change during the lifetime of this `ScopedId`
 /// because the `ScopedId` stores a reference to that `registry`.
 /// This can be achieved:
 /// - By allocating the `registry` on the heap (through a `std::unique_ptr` or a `std::shared_ptr`)
@@ -82,7 +82,7 @@ private:
 };
 
 /// Wraps an ID in a RAII class that will destroy the corresponding object automatically.
-/// This requires that you guarantee that the adress of the `registry` won't change during the lifetime of this `ScopedId`
+/// This requires that you guarantee that the address of the `registry` won't change during the lifetime of this `ScopedId`
 /// because the `ScopedId` stores a reference to that `registry`.
 /// This can be achieved:
 /// - By allocating the `registry` on the heap (through a `std::unique_ptr` or a `std::shared_ptr`)

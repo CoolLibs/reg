@@ -17,6 +17,8 @@ This library allows you to manually control the lifetime of objects and to keep 
   - [Checking for the existence of an object](#checking-for-the-existence-of-an-object)
   - [Iterating over all the objects](#iterating-over-all-the-objects)
   - [Managing the lifetime of objects](#managing-the-lifetime-of-objects)
+    - [Manual Management](#manual-management)
+    - [ScopedId](#scopedid)
   - [Thread safety](#thread-safety)
   - [AnyId](#anyid)
   - [Registries](#registries)
@@ -192,8 +194,29 @@ You can iterate over all the objects in the registry, but the order is not guara
 
 ### Managing the lifetime of objects
 
+#### Manual Management
+
 ⚠️ **Important:** You have to manually delete (using `registry.destroy(id);`) the objects that you no longer need. You will get memory leaks if you forget to do that.<br/>
 This should not be a big deal if you use this library to store user-facing objects: the deletion of the objects will be tied to a user clicking _delete_ in the UI, and you will just have to call `registry.destroy(id);` whenever this happens.
+
+#### `ScopedId`
+
+If you have a use-case where scope-based cleanup is desirable, you can use a `reg::ScopedId`:
+```cpp
+auto registry = reg::Registry<float>{};
+{
+    const auto scoped_id = ScopedId{registry, 3.f};
+    /* do something with the id ...*/
+} // The id and its object are automatically destroyed when we exit this scope
+```
+
+⚠️ Using a `ScopedId` requires that you guarantee that the address of the `registry` won't change during the lifetime of the `ScopedId`. That is because the `ScopedId` stores a reference to the `Registry` it belongs to.
+This can be achieved by:
+- Allocating the `registry` on the heap (through a `std::unique_ptr` or a `std::shared_ptr`)
+- Allocating the `registry` on the stack in a parent scope relative to this `ScopedId`, like the beginning of `main`
+- Making the `registry` a global variable.
+
+*NB:* It is still valid to read the underlying id after the `ScopedId` has been moved from. It will keep its value. The only difference is that it is no longer responsible for destroying the id when it goes out of scope.
 
 ### Thread safety
 

@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
-        compiler: [ gcc-12, clang-13, cl]
+        compiler: [ gcc-10, clang-13, cl]
         build_type: [Debug, Release]
 
     name: ${{ matrix.os }} ${{ matrix.compiler}} ${{ matrix.build_type }}

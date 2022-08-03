@@ -9,6 +9,6 @@ target_include_directories(reg INTERFACE lib) # To find cpp-typelist
 
 set(UUID_BUILD_TESTS      OFF CACHE BOOL "")
 set(UUID_TIME_GENERATOR   OFF CACHE BOOL "")
-set(UUID_USING_CXX20_SPAN ON  CACHE BOOL "")
+set(UUID_USING_CXX20_SPAN OFF  CACHE BOOL "")
 add_subdirectory(lib/stduuid)
 target_link_libraries(reg INTERFACE stduuid)

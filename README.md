@@ -8,31 +8,35 @@ This library allows you to manually control the lifetime of objects and to keep 
 
 ## Table of Content
 
-- [Use case](#use-case)
-- [Tutorial](#tutorial)
-  - [Creating an object](#creating-an-object)
-  - [Accessing an object](#accessing-an-object)
-  - [Modifying an object](#modifying-an-object)
-  - [Destroying an object](#destroying-an-object)
-  - [Checking for the existence of an object](#checking-for-the-existence-of-an-object)
-  - [Iterating over all the objects](#iterating-over-all-the-objects)
-  - [Managing the lifetime of objects](#managing-the-lifetime-of-objects)
-    - [Manual Management](#manual-management)
-    - [ScopedId](#scopedid)
-  - [Thread safety](#thread-safety)
-  - [AnyId](#anyid)
-  - [Registries](#registries)
-  - [to_string()](#to_string)
-  - [is_empty()](#is_empty)
-  - [Serialization and _cereal_ support](#serialization-and-cereal-support)
-  - [underlying_xxx()](#underlying_xxx)
-  - [More examples](#more-examples)
-- [Notes](#notes)
-  - [Why can't I just use native pointers (\*) or references (&)?](#why-can-t-i-just-use-native-pointers-----or-references-----)
-  - [We don't provide automatic lifetime management](#we-don-t-provide-automatic-lifetime-management)
-  - [Performance is not our main concern](#performance-is-not-our-main-concern)
-- [Future developments](#future-developments)
-  - [`for_each` functions](#for_each-functions)
+- [_reg_, a registry library](#reg-a-registry-library)
+  - [Table of Content](#table-of-content)
+  - [Use case](#use-case)
+  - [Including](#including)
+  - [Tutorial](#tutorial)
+    - [Creating an object](#creating-an-object)
+    - [Accessing an object](#accessing-an-object)
+    - [Modifying an object](#modifying-an-object)
+    - [Destroying an object](#destroying-an-object)
+    - [Checking for the existence of an object](#checking-for-the-existence-of-an-object)
+    - [Iterating over all the objects](#iterating-over-all-the-objects)
+    - [Managing the lifetime of objects](#managing-the-lifetime-of-objects)
+      - [Manual Management](#manual-management)
+      - [`ScopedId`](#scopedid)
+    - [Thread safety](#thread-safety)
+    - [`AnyId`](#anyid)
+    - [`Registries`](#registries)
+    - [`to_string()`](#to_string)
+    - [`is_empty()`](#is_empty)
+    - [Serialization and _cereal_ support](#serialization-and-cereal-support)
+    - [`underlying_xxx()`](#underlying_xxx)
+    - [More examples](#more-examples)
+  - [Running the tests](#running-the-tests)
+  - [Notes](#notes)
+    - [Why can't I just use native pointers (\*) or references (&)?](#why-cant-i-just-use-native-pointers--or-references-)
+    - [We don't provide automatic lifetime management](#we-dont-provide-automatic-lifetime-management)
+    - [Performance is not our main concern](#performance-is-not-our-main-concern)
+  - [Future developments](#future-developments)
+    - [`for_each` functions](#for_each-functions)
 
 ## Use case
 
@@ -43,6 +47,19 @@ This library was designed for this specific use case:
 ![](./docs/img/blender-hierarchy.png)
 
 > The _Cube_'s constraint references the _MyPosition_ object. We want this reference to live forever (or at least until the user changes it).
+
+## Including
+
+To add this library to your project, simply add those two lines to your *CMakeLists.txt*:
+```cmake
+add_subdirectory(path/to/reg)
+target_link_libraries(${PROJECT_NAME} PRIVATE reg::reg)
+```
+
+Then include it as:
+```cpp
+#include <reg/reg.hpp>
+```
 
 ## Tutorial
 
@@ -299,6 +316,11 @@ But beware that we do not offer any guarantee that the return types of these fun
 ### More examples
 
 Check out [our tests](./tests/test.cpp) for more examples of how to use the library.
+
+## Running the tests
+
+Simply use "tests/CMakeLists.txt" to generate a project, then run it.<br/>
+If you are using VSCode and the CMake extension, this project already contains a *.vscode/settings.json* that will use the right CMakeLists.txt automatically.
 
 ## Notes
 

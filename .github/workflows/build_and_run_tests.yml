@@ -1,0 +1,59 @@
+name: Build and run tests
+
+on: 
+  push:
+    branches: [ main ]
+
+  pull_request:
+    branches: [ main ]
+
+
+env:
+  TARGET: reg-tests # Should be the name of the target you created in your CMakeLists.txt and want to build and run
+
+
+jobs:
+#-----------------------------------------------------------------------------------------------
+  Windows:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+        compiler: [ gcc-10, clang-13, cl]
+        build_type: [Debug, Release]
+
+    name: ${{ matrix.os }} ${{ matrix.compiler}} ${{ matrix.build_type }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure CMake
+      run: cmake .\tests -B ${{github.workspace}}\build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}\build --config ${{matrix.build_type}} --target ${{env.TARGET}}
+
+    - name: Run
+      run: ${{github.workspace}}\build\${{ matrix.build_type }}\${{env.TARGET}}
+#-----------------------------------------------------------------------------------------------
+  MacOS-Linux: 
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        compiler: [ gcc-10, clang-13 ]
+        build_type: [Debug, Release]
+    
+    name: ${{ matrix.os }} ${{ matrix.compiler}} ${{matrix.build_type}}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure CMake
+      run: cmake ./tests -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --target ${{env.TARGET}}
+
+    - name: Run
+      run: ${{github.workspace}}/build/${{env.TARGET}}

@@ -26,6 +26,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+            submodules: recursive
 
     - name: Configure CMake
       run: cmake .\tests -B ${{github.workspace}}\build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
@@ -48,6 +50,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+          submodules: recursive
 
     - name: Configure CMake
       run: cmake ./tests -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}

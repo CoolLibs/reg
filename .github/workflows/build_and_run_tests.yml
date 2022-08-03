@@ -42,8 +42,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        compiler: [ gcc-12, clang-13 ]
+        os: [ubuntu-22.04, macos-latest]
+        compiler: [ gcc-11, clang-13 ]
         build_type: [Debug, Release]
     
     name: ${{ matrix.os }} ${{ matrix.compiler}} ${{matrix.build_type}}

@@ -359,12 +359,12 @@ TEST_CASE_TEMPLATE(
     SUBCASE("Move-constructing a ScopedId transfers responsibility.")
     {
         {
-            const auto final_scope = [&]() {
-                auto tmp_scope = ScopedId{registry, 3.f}; // Can't be const if we want to move from it
-                REQUIRE(*registry.get(tmp_scope) == 3.f);
-                return std::move(tmp_scope); // Force a move, don't rely on copy-elision as this is not what we want to test
-            }();                             // Destructor of tmp_scope is called but shouldn't do anything
-            REQUIRE(*registry.get(final_scope) == 3.f);
+            const auto final_scoped_id = [&]() {
+                auto tmp_scoped_id = ScopedId{registry, 3.f}; // Can't be const if we want to move from it
+                REQUIRE(*registry.get(tmp_scoped_id) == 3.f);
+                return std::move(tmp_scoped_id); // Force a move, don't rely on copy-elision as this is not what we want to test
+            }();                                 // Destructor of tmp_scope is called but shouldn't do anything
+            REQUIRE(*registry.get(final_scoped_id) == 3.f);
         } // Destructor of final_scope is called and should destroy the id
         CHECK(registry.is_empty());
     }

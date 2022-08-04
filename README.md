@@ -9,8 +9,10 @@ This library allows you to manually control the lifetime of objects and to keep 
 ## Table of Content
 
 - [_reg_, a registry library](#reg-a-registry-library)
-  - [Table of Content](#table-of-content)
   - [Use case](#use-case)
+    - [When to prefer a registry to a `std::vector`](#when-to-prefer-a-registry-to-a-stdvector)
+    - [When to prefer a registry to a `std::list`](#when-to-prefer-a-registry-to-a-stdlist)
+    - [Summary](#summary)
   - [Including](#including)
   - [Tutorial](#tutorial)
     - [Creating an object](#creating-an-object)
@@ -30,13 +32,13 @@ This library allows you to manually control the lifetime of objects and to keep 
     - [Serialization and _cereal_ support](#serialization-and-cereal-support)
     - [`underlying_xxx()`](#underlying_xxx)
     - [More examples](#more-examples)
-  - [Running the tests](#running-the-tests)
   - [Notes](#notes)
     - [Why can't I just use native pointers (\*) or references (&)?](#why-cant-i-just-use-native-pointers--or-references-)
     - [We don't provide automatic lifetime management](#we-dont-provide-automatic-lifetime-management)
     - [Performance is not our main concern](#performance-is-not-our-main-concern)
   - [Future developments](#future-developments)
     - [`for_each` functions](#for_each-functions)
+  - [Running the tests](#running-the-tests)
 
 ## Use case
 
@@ -47,6 +49,24 @@ This library was designed for this specific use case:
 ![](./docs/img/blender-hierarchy.png)
 
 > The _Cube_'s constraint references the _MyPosition_ object. We want this reference to live forever (or at least until the user changes it).
+
+### When to prefer a registry to a `std::vector`
+
+Say you stored your objects in a `std::vector`, and stored iterators to elements of that vector in order to reference them. Adding or removing elements to a `std::vector` can **invalidate all of the iterators**, so this is no good for our use case.
+
+But there is more! **Indices get invalidated too**, so they are no better than iterators to store references to elements. For example if you remove the first element of the vector, all indices should be decremented by one if you want them to keep referencing the same element.
+
+### When to prefer a registry to a `std::list`
+
+Based on what we said about `std::vector`, we might think that `std::list` is a better match for our needs. And indeed, the list's iterator never get invalidated... unless you remove the element they were pointing to. And when iterators get invalidated, you have no way of knowing that! This is one of the points where a registry shines: **it always allows you to know if an id is valid or not**. This is very important in the case where any part of your application could delete the object at any time, and the other parts that had a reference to that object need to realize that and react accordingly. None of the STL iterators allow you to know if they are valid or not, nor if it is safe to dereference them or not.
+
+The second advantage of registries is **serialization**. Iterators are tied to an address in memory and cannot be serialized (a.k.a. saved to a file or sent over a network). An id on the other hand is just a unique number that always allow you to reference the object. When a registry is loaded from a file, all the ids are kept as they were when saving the file and can still be used to reference the same objects.
+
+### Summary
+
+If you have a need for at least one of thoses properties, you might prefer registries and ids to the STL containers and their iterators:
+- **Robust references** that only get invalidated when the referenced object is destroyed, and that allow you to know if the reference is still valid or not.
+- **Serialization**
 
 ## Including
 
@@ -231,9 +251,9 @@ auto registry = reg::Registry<float>{};
 This can be achieved by:
 - Allocating the `registry` on the heap (through a `std::unique_ptr` or a `std::shared_ptr`)
 - Allocating the `registry` on the stack in a parent scope relative to this `ScopedId`, like the beginning of `main`
-- Making the `registry` a global variable.
+- Making the `registry` a global static variable.
 
-*NB:* It is still valid to read the underlying id after the `ScopedId` has been moved from. It will keep its value. The only difference is that it is no longer responsible for destroying the id when it goes out of scope.
+*NB:* It is still valid to read the underlying id after the `ScopedId` has been moved from. It will keep its value. The only difference is just that it is no longer responsible for destroying the id when it goes out of scope.
 
 ### Thread safety
 
@@ -241,15 +261,13 @@ This can be achieved by:
 
 **Most operations on a `reg::Registry` are thread-safe.** Internally we use a `std::shared_mutex` to lock the registry while we do some operations on it. The fact that the mutex is shared means that multiple threads can read from the registry at the same time, but locking will occur when you try to modify the registry or one of the objects it stores.
 
-We cannot do the locking automatically in the cases where we hand out references to objects in the registry, because we do not control how long those references will live. In those cases it is _your_ responsibility to care about thread-safety. You can use `mutex()` to get the mutex and lock it yourself.<br/>
+We cannot do the locking automatically in the cases where we hand out references to objects in the registry, because we do not control how long those references will live. In those cases it is _your_ responsibility to care about thread-safety. You can use `registry.mutex()` to get the mutex and lock it yourself.<br/>
 You should only use the references while your are locking the mutex: once the lock is gone any thread could invalidate your reference at any time. (Or alternatively you can make sure that only one thread ever accesses your registry, which is another way of solving the thread-safety problem.)
-
-Those "unsafe" functions are useful if you cannot afford to pay the cost of the copy in `get()` or the assignment in `set()`, but you should prefer the safe ones in all the other cases, which should be most cases.
 
 ### `AnyId`
 
 `reg::AnyId` is a type that can store any `reg::Id<T>`. It has the exact same memory footprint as a `reg::Id<T>` and doesn't do any dynamic allocation either. (It basically stores the same uint128 as a `reg::Id<T>` does).<br/>
-It removes the type-safety of a `reg::Id` and is intended to only be used in cases where you want to store ids from different registries and don't care about their type. (For example when listing all the objects that some piece of code uses).
+Note that this removes the type-safety of a `reg::Id` and is intended to only be used in cases where you want to store ids from different registries and don't care about their types. (For example when listing all the objects that some piece of code uses).
 
 ```cpp
 auto       registry = reg::Registry<float>{};
@@ -317,11 +335,6 @@ But beware that we do not offer any guarantee that the return types of these fun
 
 Check out [our tests](./tests/test.cpp) for more examples of how to use the library.
 
-## Running the tests
-
-Simply use "tests/CMakeLists.txt" to generate a project, then run it.<br/>
-If you are using VSCode and the CMake extension, this project already contains a *.vscode/settings.json* that will use the right CMakeLists.txt automatically.
-
 ## Notes
 
 ### Why can't I just use native pointers (\*) or references (&)?
@@ -348,3 +361,8 @@ Since a registry is designed to store user-visible values, there likely won't be
 
 Should we add `for_each_value()`, `for_each_id()` and `for_each_object()` (a.k.a.`for_each_id_value_pair()`)?
 I can't think of a use case for these right now, so I will wait for one before implementing them. If you have a use case, please raise an issue! I will be happy to hear what you have to say about these functions.
+
+## Running the tests
+
+Simply use "tests/CMakeLists.txt" to generate a project, then run it.<br/>
+If you are using VSCode and the CMake extension, this project already contains a *.vscode/settings.json* that will use the right CMakeLists.txt automatically.

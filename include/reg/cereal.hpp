@@ -2,6 +2,7 @@
 
 #include <cereal/types/tuple.hpp>
 #include <cereal/types/unordered_map.hpp>
+#include <cereal/types/utility.hpp>
 #include "reg.hpp"
 
 namespace cereal {
@@ -45,6 +46,18 @@ template<class Archive, typename T>
 void serialize(Archive& archive, reg::Registry<T>& registry)
 {
     archive(registry.underlying_container());
+}
+
+template<class Archive, typename T>
+void serialize(Archive& archive, reg::OrderedRegistry<T>& registry)
+{
+    archive(registry.underlying_container());
+}
+
+template<class Archive, typename Key, typename Value>
+void serialize(Archive& archive, reg::internal::OrderPreservingMap<Key, Value>& map)
+{
+    archive(map.underlying_container());
 }
 
 template<class Archive, typename... Ts>

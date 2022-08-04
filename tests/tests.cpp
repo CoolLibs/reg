@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <cassert>
 #include <reg/reg.hpp>
+#include <tuple>
 
 template<typename Registry>
 auto size(const Registry& registry)
@@ -312,4 +313,62 @@ TEST_CASE_TEMPLATE("is_empty()", Registry, reg::Registry<float>, reg::OrderedReg
     CHECK(!registry.is_empty());
     registry.destroy(id);
     CHECK(registry.is_empty());
+}
+
+TEST_CASE_TEMPLATE(
+    "ScopedId", RegistryAndId,
+    std::tuple<reg::Registry<float>, reg::ScopedId<float>>, // We use this tuple trick to run the test on pairs of types (the Registry and the corresponding ScopedId)
+    std::tuple<reg::OrderedRegistry<float>, reg::ScopedId_Ordered<float>>
+)
+{
+    using Registry = std::tuple_element<0, RegistryAndId>::type;
+    using ScopedId = std::tuple_element<1, RegistryAndId>::type;
+
+    auto registry = Registry{};
+    REQUIRE(registry.is_empty());
+
+    SUBCASE("The destructor of ScopedId automatically deletes the id it was responsible for.")
+    {
+        {
+            const auto scoped_id = ScopedId{registry, 3.f};
+            REQUIRE(*registry.get(scoped_id) == 3.f);
+        }
+        CHECK(registry.is_empty());
+    }
+
+#pragma warning(disable : 4068) // "unknown pragma"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpessimizing-move"
+#pragma GCC diagnostic   push
+#pragma GCC diagnostic   ignored "-Wpessimizing-move"
+
+    SUBCASE("Move-assigning a ScopedId transfers responsibility.")
+    {
+        {
+            auto final_scope = ScopedId{};
+            {
+                auto tmp_scope = ScopedId{registry, 3.f};
+                REQUIRE(*registry.get(tmp_scope) == 3.f);
+                final_scope = std::move(tmp_scope);
+            } // Destructor of tmp_scope is called but shouldn't do anything
+            REQUIRE(*registry.get(final_scope) == 3.f);
+        } // Destructor of final_scope is called and should destroy the id
+        CHECK(registry.is_empty());
+    }
+
+    SUBCASE("Move-constructing a ScopedId transfers responsibility.")
+    {
+        {
+            const auto final_scoped_id = [&]() {
+                auto tmp_scoped_id = ScopedId{registry, 3.f}; // Can't be const if we want to move from it
+                REQUIRE(*registry.get(tmp_scoped_id) == 3.f);
+                return std::move(tmp_scoped_id); // Force a move, don't rely on copy-elision as this is not what we want to test
+            }();                                 // Destructor of tmp_scope is called but shouldn't do anything
+            REQUIRE(*registry.get(final_scoped_id) == 3.f);
+        } // Destructor of final_scope is called and should destroy the id
+        CHECK(registry.is_empty());
+    }
+
+#pragma GCC diagnostic   pop
+#pragma clang diagnostic pop
 }

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(reg-tests)
 
-add_executable(${PROJECT_NAME} test.cpp)
+add_executable(${PROJECT_NAME} tests.cpp)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 if(MSVC)

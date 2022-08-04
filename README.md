@@ -54,19 +54,19 @@ This library was designed for this specific use case:
 
 Say you stored your objects in a `std::vector`, and stored iterators to elements of that vector in order to reference them. Adding or removing elements to a `std::vector` can **invalidate all of the iterators**, so this is no good for our use case.
 
-But there is more! **Indices get invalidated too**, so they are no better than iterators to store references to elements. For example if you remove the first element of the vector, all indices should be decremented by one if you want them to keep referencing the same element.
+But there is more! **Indices get invalidated too**, so they are no better than iterators to store references to elements. For example if you remove the first element of the vector, all indices should be decremented by one if you want them to keep referencing the same elements.
 
 ### When to prefer a registry to a `std::list`
 
-Based on what we said about `std::vector`, we might think that `std::list` is a better match for our needs. And indeed, the list's iterator never get invalidated... unless you remove the element they were pointing to. And when iterators get invalidated, you have no way of knowing that! This is one of the points where a registry shines: **it always allows you to know if an id is valid or not**. This is very important in the case where any part of your application could delete the object at any time, and the other parts that had a reference to that object need to realize that and react accordingly. None of the STL iterators allow you to know if they are valid or not, nor if it is safe to dereference them or not.
+Based on what we said about `std::vector`, we might think that `std::list` is a better match for our needs. And indeed, the list's iterators never get invalidated... unless you remove the element they were pointing to. And when iterators get invalidated, you have no way of knowing that! This is one of the points where a registry shines: **it always allows you to know if an id is valid or not**. This is very important in the case where any part of your application could delete the object at any time, and the other parts that had a reference to that object need to realize that and react accordingly. None of the STL iterators allow you to know if they are valid or not, nor if it is safe to dereference them or not.
 
-The second advantage of registries is **serialization**. Iterators are tied to an address in memory and cannot be serialized (a.k.a. saved to a file or sent over a network). An id on the other hand is just a unique number that always allow you to reference the object. When a registry is loaded from a file, all the ids are kept as they were when saving the file and can still be used to reference the same objects.
+The second advantage of registries is **serialization**. Iterators are tied to an address in memory and cannot be serialized (a.k.a. saved to a file or sent over a network). An id on the other hand is just a unique number that always allows you to reference the object. When a registry is loaded from a file, all the ids are kept as they were when saving the file and can still be used to reference the same objects.
 
 ### Summary
 
 If you have a need for at least one of thoses properties, you might prefer registries and ids to the STL containers and their iterators:
 - **Robust references** that only get invalidated when the referenced object is destroyed, and that allow you to know if the reference is still valid or not.
-- **Serialization**
+- **Serialization**.
 
 ## Including
 

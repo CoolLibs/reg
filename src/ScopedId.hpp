@@ -48,7 +48,8 @@ public:
         return *this;
     }
 
-    auto get() const -> Id<T> { return _id; }
+    auto get() const -> const Id<T>& { return _id; }
+    auto get() -> Id<T>& { return _id; }
 
 private:
     RegistryT* _registry{}; // We use a pointer instead of a reference because we want it to be nullable. This serves both when default-constructing a ScopedId, and also as a bool to know if we have been moved from.
@@ -73,9 +74,11 @@ public:
         : _scoped_id{registry, value}
     {}
 
-    auto get() const -> Id<T> { return _scoped_id.get(); }
+    auto get() const -> const Id<T>& { return _scoped_id.get(); }
+    auto get() -> Id<T>& { return _scoped_id.get(); }
 
-    operator Id<T>() const { return get(); }
+    operator const Id<T>&() const { return get(); }
+    operator Id<T>&() { return get(); }
 
 private:
     internal::ScopedId<Registry<T>, T> _scoped_id;
@@ -97,9 +100,11 @@ public:
         : _scoped_id{registry, value}
     {}
 
-    auto get() const -> Id<T> { return _scoped_id.get(); }
+    auto get() const -> const Id<T>& { return _scoped_id.get(); }
+    auto get() -> Id<T>& { return _scoped_id.get(); }
 
-    operator Id<T>() const { return get(); }
+    operator const Id<T>&() const { return get(); }
+    operator Id<T>&() { return get(); }
 
 private:
     internal::ScopedId<OrderedRegistry<T>, T> _scoped_id;

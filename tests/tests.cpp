@@ -220,6 +220,7 @@ TEST_CASE_TEMPLATE("You can iterate over the ids and values in the registry", Re
         std::ignore = id;
         std::ignore = value;
     }
+    std::ignore = my_id;
 }
 
 TEST_CASE_TEMPLATE("Locking manually", Registry, reg::Registry<std::vector<float>>, reg::OrderedRegistry<std::vector<float>>)

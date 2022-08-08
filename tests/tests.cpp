@@ -217,8 +217,8 @@ TEST_CASE_TEMPLATE("You can iterate over the ids and values in the registry", Re
     {
         assert(id == my_id);       // Can't use doctest's REQUIRE() because of a weird interaction between lambda captures and structured bindings :'( https://github.com/doctest/doctest/issues/279
         assert(value == my_value); // Same
-        std::ignore id;
-        std::ignore value;
+        std::ignore = id;
+        std::ignore = value;
     }
 }
 

@@ -70,7 +70,7 @@ If you have a need for at least one of thoses properties, you might prefer regis
 
 ## Including
 
-To add this library to your project, simply add those two lines to your *CMakeLists.txt*:
+To add this library to your project, simply add these two lines to your *CMakeLists.txt*:
 ```cmake
 add_subdirectory(path/to/reg)
 target_link_libraries(${PROJECT_NAME} PRIVATE reg::reg)

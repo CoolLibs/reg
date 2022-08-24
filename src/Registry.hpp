@@ -1,6 +1,7 @@
 #pragma once
 #include <uuid.h>
 #include <array>
+#include <mutex>
 #include <optional>
 #include <random>
 #include <shared_mutex>

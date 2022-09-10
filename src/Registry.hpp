@@ -81,7 +81,7 @@ public:
     }
 
     /// Thread-safe.
-    /// Returns iff `id` references an object in the registry.
+    /// Returns true iff `id` references an object in the registry.
     [[nodiscard]] auto contains(const Id<T>& id) const -> bool
     {
         std::shared_lock lock{_mutex};

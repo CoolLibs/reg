@@ -6,9 +6,12 @@ namespace reg {
 
 class AnyId {
 public:
-    // AnyId() = default; // Not sure if having a default constructor makes sense
+    AnyId() = default;
+    AnyId(uuids::uuid const& uuid)
+        : _uuid{uuid}
+    {}
     template<typename T>
-    AnyId(const Id<T>& id)
+    AnyId(Id<T> const& id)
         : _uuid{id._uuid}
     {}
 

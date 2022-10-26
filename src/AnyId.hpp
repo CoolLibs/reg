@@ -15,6 +15,12 @@ public:
         : _uuid{id._uuid}
     {}
 
+    template<typename T>
+    operator Id<T>() const
+    {
+        return Id<T>{_uuid};
+    }
+
     friend bool operator==(const AnyId&, const AnyId&) = default;
 
     auto underlying_uuid() -> uuids::uuid& { return _uuid; }

@@ -36,7 +36,7 @@ void serialize(Archive& archive, reg::Id<T>& id)
     archive(id.underlying_uuid());
 }
 
-template<class Archive, typename T>
+template<class Archive>
 void serialize(Archive& archive, reg::AnyId& id)
 {
     archive(id.underlying_uuid());

@@ -7,6 +7,3 @@
 [submodule "tooling"]
 	path = tooling
 	url = https://github.com/CoolLibs/tooling
-[submodule "lib/cpp-typelist"]
-	path = lib/cpp-typelist
-	url = https://github.com/CoolLibs/cpp-typelist

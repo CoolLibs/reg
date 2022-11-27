@@ -1,5 +1,4 @@
 #pragma once
-#include <cpp-typelist/typelist.hpp>
 #include <tuple>
 #include "Registry.hpp"
 
@@ -97,7 +96,7 @@ public:
         of<T>().destroy(id);
     }
 
-    using Tuple = typename tl::type_list<Ts...>::template wrap<reg::Registry>::to_tuple; // Create a tuple of reg::Registry<T> for each T in Ts
+    using Tuple = std::tuple<Ts...>;
 
     auto underlying_registries() const -> const Tuple& { return _registries; }
     auto underlying_registries() -> Tuple& { return _registries; }

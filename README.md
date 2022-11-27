@@ -8,37 +8,36 @@ This library allows you to manually control the lifetime of objects and to keep 
 
 ## Table of Content
 
-- [_reg_, a registry library](#reg-a-registry-library)
-  - [Use case](#use-case)
-    - [When to prefer a registry to a `std::vector`](#when-to-prefer-a-registry-to-a-stdvector)
-    - [When to prefer a registry to a `std::list`](#when-to-prefer-a-registry-to-a-stdlist)
-    - [Summary](#summary)
-  - [Including](#including)
-  - [Tutorial](#tutorial)
-    - [Creating an object](#creating-an-object)
-    - [Accessing an object](#accessing-an-object)
-    - [Modifying an object](#modifying-an-object)
-    - [Destroying an object](#destroying-an-object)
-    - [Checking for the existence of an object](#checking-for-the-existence-of-an-object)
-    - [Iterating over all the objects](#iterating-over-all-the-objects)
-    - [Managing the lifetime of objects](#managing-the-lifetime-of-objects)
-      - [Manual Management](#manual-management)
-      - [`ScopedId`](#scopedid)
-    - [Thread safety](#thread-safety)
-    - [`AnyId`](#anyid)
-    - [`Registries`](#registries)
-    - [`to_string()`](#to_string)
-    - [`is_empty()`](#is_empty)
-    - [Serialization and _cereal_ support](#serialization-and-cereal-support)
-    - [`underlying_xxx()`](#underlying_xxx)
-    - [More examples](#more-examples)
-  - [Notes](#notes)
-    - [Why can't I just use native pointers (\*) or references (&)?](#why-cant-i-just-use-native-pointers--or-references-)
-    - [We don't provide automatic lifetime management](#we-dont-provide-automatic-lifetime-management)
-    - [Performance is not our main concern](#performance-is-not-our-main-concern)
-  - [Future developments](#future-developments)
-    - [`for_each` functions](#for_each-functions)
-  - [Running the tests](#running-the-tests)
+- [Use case](#use-case)
+  - [When to prefer a registry to a `std::vector`](#when-to-prefer-a-registry-to-a-stdvector)
+  - [When to prefer a registry to a `std::list`](#when-to-prefer-a-registry-to-a-stdlist)
+  - [Summary](#summary)
+- [Including](#including)
+- [Tutorial](#tutorial)
+  - [Creating an object](#creating-an-object)
+  - [Accessing an object](#accessing-an-object)
+  - [Modifying an object](#modifying-an-object)
+  - [Destroying an object](#destroying-an-object)
+  - [Checking for the existence of an object](#checking-for-the-existence-of-an-object)
+  - [Iterating over all the objects](#iterating-over-all-the-objects)
+  - [Managing the lifetime of objects](#managing-the-lifetime-of-objects)
+    - [Manual Management](#manual-management)
+    - [`ScopedId`](#scopedid)
+  - [Thread safety](#thread-safety)
+  - [`AnyId`](#anyid)
+  - [`Registries`](#registries)
+  - [`to_string()`](#to_string)
+  - [`is_empty()`](#is_empty)
+  - [Serialization and _cereal_ support](#serialization-and-cereal-support)
+  - [`underlying_xxx()`](#underlying_xxx)
+  - [More examples](#more-examples)
+- [Notes](#notes)
+  - [Why can't I just use native pointers (\*) or references (\&)?](#why-cant-i-just-use-native-pointers--or-references-)
+  - [We don't provide automatic lifetime management](#we-dont-provide-automatic-lifetime-management)
+  - [Performance is not our main concern](#performance-is-not-our-main-concern)
+- [Future developments](#future-developments)
+  - [`for_each` functions](#for_each-functions)
+- [Running the tests](#running-the-tests)
 
 ## Use case
 
@@ -281,8 +280,12 @@ assert(id == any_id); // They can be compared
 `reg::Registries` is a type that holds a set of registries of different types:
 
 ```cpp
-    using Registries = reg::Registries<int, float, double>; // Creates 3 registries: 1 for int,
-    Registries registries{};                                // 1 for float and 1 for double
+    using Registries = reg::Registries< // Type that holds 3 registries:
+        reg::Registry<int>,             // 1 for int,
+        reg::Registry<float>,           // 1 for float
+        reg::Registry<double>           // and 1 for double
+    >;
+    Registries registries{};
 
     const reg::Registry<int>& const_registry = registries.of<int>(); // You can access each of the registries
           reg::Registry<int>&       registry = registries.of<int>(); // with of<T>()
@@ -291,7 +294,11 @@ assert(id == any_id); // They can be compared
 As a convenience, `reg::Registries` provides the thread-safe functions of a `reg::Registry` and will automatically call them on the right registry:
 
 ```cpp
-using Registries = reg::Registries<int, float, double>;
+    using Registries = reg::Registries<
+        reg::Registry<int>,
+        reg::Registry<float>,
+        reg::Registry<double>
+    >;
 Registries registries{};
 
 const auto id = registries.create(5.f);             //

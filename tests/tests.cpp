@@ -269,7 +269,10 @@ TEST_CASE_TEMPLATE("Locking manually", Registry, reg::Registry<std::vector<float
 
 TEST_CASE("Registries allows you to access the underlying registries by type")
 {
-    using Registries = reg::Registries<int, float, double>;
+    using Registries = reg::Registries<
+        reg::Registry<int>,
+        reg::Registry<float>,
+        reg::Registry<double>>;
     Registries registries{};
 
     {
@@ -296,7 +299,10 @@ TEST_CASE("Registries allows you to access the underlying registries by type")
 
 TEST_CASE_TEMPLATE("Registries expose the thread-safe functions of the underlying registries", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
-    using Registries = reg::Registries<float, int, double>;
+    using Registries = reg::Registries<
+        reg::Registry<float>,
+        reg::Registry<int>,
+        reg::Registry<double>>;
     Registries registries{};
     {
         const auto id = registries.create(5);

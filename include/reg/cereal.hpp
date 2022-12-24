@@ -53,13 +53,7 @@ void serialize(Archive& archive, reg::Registry<T>& registry)
 template<class Archive, typename T>
 void serialize(Archive& archive, reg::OrderedRegistry<T>& registry)
 {
-    archive(registry.underlying_container());
-}
-
-template<class Archive, typename Key, typename Value>
-void serialize(Archive& archive, reg::internal::OrderPreservingMap<Key, Value>& map)
-{
-    archive(map.underlying_container());
+    archive(registry.underlying_container().underlying_container());
 }
 
 template<class Archive, typename... Ts>

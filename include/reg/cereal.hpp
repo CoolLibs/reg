@@ -12,7 +12,6 @@ auto save_minimal(Archive const&, uuids::uuid const& uuid) -> std::string
 {
     return uuids::to_string(uuid);
 }
-
 template<class Archive>
 void load_minimal(Archive const&, uuids::uuid& uuid, std::string const& value)
 {
@@ -24,15 +23,25 @@ void load_minimal(Archive const&, uuids::uuid& uuid, std::string const& value)
 }
 
 template<class Archive, typename T>
-void serialize(Archive& archive, reg::Id<T>& id)
+auto save_minimal(Archive const& ar, reg::Id<T> const& id) -> std::string
 {
-    archive(id.underlying_uuid());
+    return save_minimal(ar, id.underlying_uuid());
+}
+template<class Archive, typename T>
+void load_minimal(Archive const& ar, reg::Id<T>& id, std::string const& value)
+{
+    load_minimal(ar, id.underlying_uuid(), value);
 }
 
 template<class Archive>
-void serialize(Archive& archive, reg::AnyId& id)
+auto save_minimal(Archive const& ar, reg::AnyId const& id) -> std::string
 {
-    archive(id.underlying_uuid());
+    return save_minimal(ar, id.underlying_uuid());
+}
+template<class Archive>
+void load_minimal(Archive const& ar, reg::AnyId& id, std::string const& value)
+{
+    load_minimal(ar, id.underlying_uuid(), value);
 }
 
 template<class Archive, typename T>

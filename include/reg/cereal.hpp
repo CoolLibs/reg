@@ -47,13 +47,13 @@ void load_minimal(Archive const& ar, reg::AnyId& id, std::string const& value)
 template<class Archive, typename T>
 void serialize(Archive& archive, reg::Registry<T>& registry)
 {
-    archive(registry.underlying_container());
+    archive(cereal::make_nvp("Underlying container", registry.underlying_container()));
 }
 
 template<class Archive, typename T>
 void serialize(Archive& archive, reg::OrderedRegistry<T>& registry)
 {
-    archive(registry.underlying_container().underlying_container());
+    archive(cereal::make_nvp("Underlying container", registry.underlying_container().underlying_container()));
 }
 
 template<class Archive, typename... Ts>

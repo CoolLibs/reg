@@ -8,26 +8,19 @@
 namespace cereal {
 
 template<class Archive>
-void save(Archive& ar, const uuids::uuid& uuid)
+auto save_minimal(Archive const&, uuids::uuid const& uuid) -> std::string
 {
-    const std::string s = uuids::to_string(uuid);
-    ar(s);
+    return uuids::to_string(uuid);
 }
 
 template<class Archive>
-void load(Archive& ar, uuids::uuid& uuid)
+void load_minimal(Archive const&, uuids::uuid& uuid, std::string const& value)
 {
-    std::string s;
-    ar(s);
-    const auto maybe_uuid = uuids::uuid::from_string(s);
-    if (maybe_uuid)
-    {
-        uuid = *maybe_uuid;
-    }
-    else
-    {
-        throw std::runtime_error{"[load(uuids::uuid)] Couldn't parse uuid: " + s};
-    }
+    auto const maybe_uuid = uuids::uuid::from_string(value);
+    if (!maybe_uuid)
+        throw std::runtime_error{"[load(uuids::uuid)] Couldn't parse uuid: " + value};
+
+    uuid = *maybe_uuid;
 }
 
 template<class Archive, typename T>

@@ -59,7 +59,7 @@ void serialize(Archive& archive, reg::OrderedRegistry<T>& registry)
 template<class Archive, typename... Ts>
 void serialize(Archive& archive, reg::Registries<Ts...>& registries)
 {
-    archive(registries.underlying_registries());
+    archive(cereal::make_nvp("Underlying registries", registries.underlying_registries()));
 }
 
 } // namespace cereal

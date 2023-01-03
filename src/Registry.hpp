@@ -190,6 +190,14 @@ public:
         return _map.empty();
     }
 
+    /// Thread-safe.
+    /// Destroys all the objects in the registry.
+    void clear()
+    {
+        std::unique_lock lock{_mutex};
+        _map.clear();
+    }
+
     /// NOT Thread-safe; see the mutex() method to make this thread-safe.
     [[nodiscard]] auto begin() { return _map.begin(); }
     /// NOT Thread-safe; see the mutex() method to make this thread-safe.
@@ -272,6 +280,11 @@ public:
     auto empty() const -> bool
     {
         return _map.empty();
+    }
+
+    void clear()
+    {
+        _map.clear();
     }
 
     auto underlying_container() const -> const std::vector<std::pair<Key, Value>>& { return _map; }

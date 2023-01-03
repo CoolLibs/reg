@@ -28,6 +28,7 @@ This library allows you to manually control the lifetime of objects and to keep 
   - [`Registries`](#registries)
   - [`to_string()`](#to_string)
   - [`is_empty()`](#is_empty)
+  - [`clear()`](#clear)
   - [Serialization and _cereal_ support](#serialization-and-cereal-support)
   - [`underlying_xxx()`](#underlying_xxx)
   - [More examples](#more-examples)
@@ -323,6 +324,12 @@ if (registry.is_empty())
 {
     // ...
 }
+```
+
+### `clear()`
+
+```cpp
+registry.clear(); /// Destroys all the objects in the registry.
 ```
 
 ### Serialization and _cereal_ support

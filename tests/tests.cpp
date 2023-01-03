@@ -324,6 +324,15 @@ TEST_CASE_TEMPLATE("is_empty()", Registry, reg::Registry<float>, reg::OrderedReg
     CHECK(registry.is_empty());
 }
 
+TEST_CASE_TEMPLATE("clear()", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
+{
+    auto registry = Registry{};
+    std::ignore   = registry.create(3.f);
+    std::ignore   = registry.create(4.f);
+    registry.clear();
+    CHECK(size(registry) == 0);
+}
+
 TEST_CASE_TEMPLATE(
     "ScopedId", RegistryAndId,
     std::tuple<reg::Registry<float>, reg::ScopedId<float>>, // We use this tuple trick to run the test on pairs of types (the Registry and the corresponding ScopedId)

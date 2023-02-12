@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 #include "Id.hpp"
 #include "Registry.hpp"
 
@@ -9,51 +10,33 @@ namespace reg {
 namespace internal {
 
 template<typename RegistryT, typename T>
+class IdAndReg {
+public:
+    IdAndReg(Id<T> const& id, RegistryT& registry)
+        : _id{id}, _registry{&registry}
+    {}
+    ~IdAndReg() { _registry->destroy(_id); }
+
+    auto id() const -> Id<T> const& { return _id; }
+
+private:
+    Id<T>      _id;
+    RegistryT* _registry; // TODO(JF) Use the underlying address of the registry that will never change
+};
+
+template<typename RegistryT, typename T>
 class ScopedId {
 public:
     ScopedId() = default;
 
     explicit ScopedId(RegistryT& registry, const T& value = {})
-        : _registry{&registry}
-        , _id{registry.create(value)}
+        : _id_and_registry{std::make_unique<IdAndReg<RegistryT, T>>(registry.create(value), registry)}
     {}
 
-    ~ScopedId()
-    {
-        if (_registry)
-        {
-            _registry->destroy(_id);
-        }
-    }
-
-    ScopedId(const ScopedId&)            = delete;
-    ScopedId& operator=(const ScopedId&) = delete;
-
-    ScopedId(ScopedId&& rhs) noexcept
-        : _registry{rhs._registry}
-        , _id{rhs._id}
-    {
-        rhs._registry = nullptr;
-    }
-
-    ScopedId& operator=(ScopedId&& rhs) noexcept
-    {
-        if (this != &rhs)
-        {
-            _id           = rhs._id;
-            _registry     = rhs._registry;
-            rhs._registry = nullptr;
-        }
-
-        return *this;
-    }
-
-    auto get() const -> const Id<T>& { return _id; }
-    auto get() -> Id<T>& { return _id; }
+    auto get() const -> Id<T> { return _id_and_registry ? _id_and_registry->id() : Id<T>{}; }
 
 private:
-    RegistryT* _registry{}; // We use a pointer instead of a reference because we want it to be nullable. This serves both when default-constructing a ScopedId, and also as a bool to know if we have been moved from.
-    Id<T>      _id{};
+    std::unique_ptr<IdAndReg<RegistryT, T>> _id_and_registry{};
 };
 
 } // namespace internal
@@ -74,11 +57,9 @@ public:
         : _scoped_id{registry, value}
     {}
 
-    auto get() const -> const Id<T>& { return _scoped_id.get(); }
-    auto get() -> Id<T>& { return _scoped_id.get(); }
+    auto get() const -> Id<T> { return _scoped_id.get(); }
 
-    operator const Id<T>&() const { return get(); }
-    operator Id<T>&() { return get(); }
+    operator Id<T>() const { return get(); }
 
 private:
     internal::ScopedId<Registry<T>, T> _scoped_id;
@@ -100,11 +81,9 @@ public:
         : _scoped_id{registry, value}
     {}
 
-    auto get() const -> const Id<T>& { return _scoped_id.get(); }
-    auto get() -> Id<T>& { return _scoped_id.get(); }
+    auto get() const -> Id<T> { return _scoped_id.get(); }
 
-    operator const Id<T>&() const { return get(); }
-    operator Id<T>&() { return get(); }
+    operator Id<T>() const { return get(); }
 
 private:
     internal::ScopedId<OrderedRegistry<T>, T> _scoped_id;

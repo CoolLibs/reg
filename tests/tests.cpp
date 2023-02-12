@@ -345,7 +345,7 @@ TEST_CASE_TEMPLATE(
     auto registry = Registry{};
     REQUIRE(registry.is_empty());
 
-    SUBCASE("The destructor of ScopedId automatically deletes the id it was responsible for.")
+    SUBCASE("The destructor of ScopedId automatically deletes the id it was owning.")
     {
         {
             const auto scoped_id = ScopedId{registry, 3.f};
@@ -360,7 +360,7 @@ TEST_CASE_TEMPLATE(
 #pragma GCC diagnostic   push
 #pragma GCC diagnostic   ignored "-Wpessimizing-move"
 
-    SUBCASE("Move-assigning a ScopedId transfers responsibility.")
+    SUBCASE("Move-assigning a ScopedId transfers ownership.")
     {
         {
             auto final_scope = ScopedId{};
@@ -374,7 +374,7 @@ TEST_CASE_TEMPLATE(
         CHECK(registry.is_empty());
     }
 
-    SUBCASE("Move-constructing a ScopedId transfers responsibility.")
+    SUBCASE("Move-constructing a ScopedId transfers ownership.")
     {
         {
             const auto final_scoped_id = [&]() {

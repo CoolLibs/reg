@@ -48,7 +48,6 @@ private:
 /// - By allocating the `registry` on the heap (through a `std::unique_ptr` or a `std::shared_ptr`)
 /// - By allocating the `registry` on the stack in a parent scope relative to this `ScopedId`, like the beginning of `main`
 /// - By making the `registry` a global variable.
-/// It is still valid to read the id after the ScopedId has been moved from. It will keep its value. The only difference is that it is no longer responsible for destroying that id when it goes out of scope.
 template<typename T>
 class ScopedId {
 public:
@@ -72,7 +71,6 @@ private:
 /// - By allocating the `registry` on the heap (through a `std::unique_ptr` or a `std::shared_ptr`)
 /// - By allocating the `registry` on the stack in a parent scope relative to this `ScopedId`, like the beginning of `main`
 /// - By making the `registry` a global variable.
-/// It is still valid to read the id after the ScopedId has been moved from. It will keep its value. The only difference is that it is no longer responsible for destroying that id when it goes out of scope.
 template<typename T>
 class ScopedId_Ordered {
 public:

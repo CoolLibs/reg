@@ -2,12 +2,13 @@
 
 The _reg_ library gives an identity to your value-types, turning them into objects stored in a `reg::Registry`. You can reference and access your objects through a `reg::Id`.
 
-You can see `reg::Id`s as references which will never get invalidated, unless you explicitly ask the registry to destroy the object. Even after an object has been destroyed it is safe to query the registry for the destroyed object through its id: the registry will simply return null (`nullptr` or `std::nullopt`) and you will have to handle the fact that the object no longer exists. Basically this is like a reference which knows whether it is dangling or not and will never let you read garbage memory.
+You can see `reg::Id`s as references which will never get invalidated (unless their owner gets destroyed (`reg::UniqueId` or `reg::SharedId`)). Even after an object has been destroyed it is safe to query the registry for the destroyed object through its id: the registry will simply return null (`nullptr` or `std::nullopt`) and you will have to handle the fact that the object no longer exists. Basically this is like a reference which knows whether it is dangling or not and will never let you read garbage memory.
 
-This library allows you to manually control the lifetime of objects and to keep references to those objects. These references will never get invalidated, even upon restarting your application: they are safe to serialize.
+These references will never get invalidated, even upon restarting your application: they are safe to serialize.
 
 ## Table of Content
 
+- [Table of Content](#table-of-content)
 - [Use case](#use-case)
   - [When to prefer a registry to a `std::vector`](#when-to-prefer-a-registry-to-a-stdvector)
   - [When to prefer a registry to a `std::list`](#when-to-prefer-a-registry-to-a-stdlist)
@@ -17,12 +18,9 @@ This library allows you to manually control the lifetime of objects and to keep 
   - [Creating an object](#creating-an-object)
   - [Accessing an object](#accessing-an-object)
   - [Modifying an object](#modifying-an-object)
-  - [Destroying an object](#destroying-an-object)
+  - [Owning IDs](#owning-ids)
   - [Checking for the existence of an object](#checking-for-the-existence-of-an-object)
   - [Iterating over all the objects](#iterating-over-all-the-objects)
-  - [Managing the lifetime of objects](#managing-the-lifetime-of-objects)
-    - [Manual Management](#manual-management)
-    - [`ScopedId`](#scopedid)
   - [Thread safety](#thread-safety)
   - [`AnyId`](#anyid)
   - [`Registries`](#registries)
@@ -34,7 +32,6 @@ This library allows you to manually control the lifetime of objects and to keep 
   - [More examples](#more-examples)
 - [Notes](#notes)
   - [Why can't I just use native pointers (\*) or references (\&)?](#why-cant-i-just-use-native-pointers--or-references-)
-  - [We don't provide automatic lifetime management](#we-dont-provide-automatic-lifetime-management)
   - [Performance is not our main concern](#performance-is-not-our-main-concern)
 - [Future developments](#future-developments)
   - [`for_each` functions](#for_each-functions)
@@ -60,7 +57,7 @@ But there is more! **Indices get invalidated too**, so they are no better than i
 
 Based on what we said about `std::vector`, we might think that `std::list` is a better match for our needs. And indeed, the list's iterators never get invalidated... unless you remove the element they were pointing to. And when iterators get invalidated, you have no way of knowing that! This is one of the points where a registry shines: **it always allows you to know if an id is valid or not**. This is very important in the case where any part of your application could delete the object at any time, and the other parts that had a reference to that object need to realize that and react accordingly. None of the STL iterators allow you to know if they are valid or not, nor if it is safe to dereference them or not.
 
-The second advantage of registries is **serialization**. Iterators are tied to an address in memory and cannot be serialized (a.k.a. saved to a file or sent over a network). An id on the other hand is just a unique number that always allows you to reference the object. When a registry is loaded from a file, all the ids are kept as they were when saving the file and can still be used to reference the same objects.
+The second advantage of registries is **serialization**. Iterators are tied to an address in memory and cannot be serialized (a.k.a. saved to a file or sent over a network). An id on the other hand is just a unique number that always allows you to reference the object. When a registry is loaded from a file, all the ids are kept as they were when saving the file and they can still be used to reference the same objects.
 
 ### Summary
 
@@ -94,7 +91,7 @@ reg::Registry<float> registry{};
 You can then create objects in the registry:
 
 ```cpp
-reg::Id<float> id = registry.create(5.f);
+reg::UniqueId<float> id = registry.create_unique(5.f);
 ```
 
 This will return you an id that you can later use to get your object back from the registry.
@@ -106,7 +103,7 @@ The preferred way is to use `get()`.
 Since the object could have been destroyed at any time by another part of the application you always have to check that `get()` actually returned you a value:
 
 ```cpp
-const std::optional<float> maybe_value = registry.get(id);
+std::optional<float> const maybe_value = registry.get(id);
 if (maybe_value) // Check that `maybe_value` contains a value
 {
     std::cout << "My value is "
@@ -118,7 +115,7 @@ if (maybe_value) // Check that `maybe_value` contains a value
 If you cannot afford to pay the cost of the copy (for example when storing big `std::vector`s in your registry) you can use `with_ref()` instead:
 
 ```cpp
-const bool success = registry.with_ref(id, [](const float& value) { // The callback will only be called if the id was found in the registry
+bool const success = registry.with_ref(id, [](float const& value) { // The callback will only be called if the id was found in the registry
     std::cout << "My value is "
                 << std::to_string(value)
                 << '\n';
@@ -135,7 +132,7 @@ A third-alternative is to use `get_ref()`, but it is not recommended because you
 ```cpp
 {
     std::shared_lock lock{registry.mutex()}; // I only want to read so I can use a shared_lock
-    const float* const maybe_value = registry.get_ref(id);
+    float const* const maybe_value = registry.get_ref(id);
     if (maybe_value) // Check that `maybe_value` contains a value
     {
         std::cout << "My value is "
@@ -160,7 +157,7 @@ If the object was not present in the registry `set()` will do nothing and return
 If your objects are big and you don't want to perform a full assignment (for example if you are storing `std::vector`s and only want to modify one element in one vector) you can use `with_mutable_ref()` instead:
 
 ```cpp
-const bool success = registry.with_mutable_ref(id, [](float& value) { // The callback will only be called if the id was found in the registry
+bool const success = registry.with_mutable_ref(id, [](float& value) { // The callback will only be called if the id was found in the registry
     value = 22.f;
 });
 
@@ -185,13 +182,16 @@ A third-alternative is to use `get_mutable_ref()`, but it is not recommended bec
 
 **NB:** you should never store a reference returned by `get_mutable_ref()`: this would defeat the whole point of this library! Always query for the object by using `get_mutable_ref()` when you need it.
 
-### Destroying an object
+### Owning IDs
+
+An object gets destroyed when the id(s) that own(s) it is (are) destroyed. You can either use `reg::UniqueId` or `reg::SharedId`. These types behave just like `std::unique_ptr` and `std::shared_ptr`.
 
 ```cpp
-registry.destroy(id);
+reg::UniqueId<float> owning_id1 = registry.create_unique(1.f);
+reg::SharedId<float> owning_id2 = registry.create_shared(1.f);
 ```
 
-You can always call `destroy()`, even if the id isn't valid. This will remove the object from the registry (if it was there in the first place) and call its destructor.
+You can then get a non-owning version of the id with `owning_id.get()`. These non-owning versions are just as fine as the owning ones, but they might be referring to an object that has been destroyed (if the owner(s) of said object has (have) been destroyed). This is not a problem though, you can still use these ids safely as long as you check if `registry.get(id)` returns you a valid object or not.
 
 ### Checking for the existence of an object
 
@@ -212,7 +212,7 @@ You can iterate over all the objects in the registry, but the order is not guara
 ```cpp
 {
     std::shared_lock lock{registry.mutex()}; // I only want to read so I can use a shared_lock
-    for (const auto&[id, value] : registry)
+    for (auto const&[id, value] : registry)
     {
         // ...
     }
@@ -228,32 +228,6 @@ You can iterate over all the objects in the registry, but the order is not guara
     }
 }
 ```
-
-### Managing the lifetime of objects
-
-#### Manual Management
-
-⚠️ **Important:** You have to manually delete (using `registry.destroy(id);`) the objects that you no longer need. You will get memory leaks if you forget to do that.<br/>
-This should not be a big deal if you use this library to store user-facing objects: the deletion of the objects will be tied to a user clicking _delete_ in the UI, and you will just have to call `registry.destroy(id);` whenever this happens.
-
-#### `ScopedId`
-
-If you have a use-case where scope-based cleanup is desirable, you can use a `reg::ScopedId`:
-```cpp
-auto registry = reg::Registry<float>{};
-{
-    const auto scoped_id = ScopedId{registry, 3.f};
-    /* do something with the id ...*/
-} // The id and its object are automatically destroyed when we exit this scope
-```
-
-⚠️ Using a `ScopedId` requires that you guarantee that the address of the `registry` won't change during the lifetime of the `ScopedId`. That is because the `ScopedId` stores a reference to the `Registry` it belongs to.
-This can be achieved by:
-- Allocating the `registry` on the heap (through a `std::unique_ptr` or a `std::shared_ptr`)
-- Allocating the `registry` on the stack in a parent scope relative to this `ScopedId`, like the beginning of `main`
-- Making the `registry` a global static variable.
-
-*NB:* It is still valid to read the underlying id after the `ScopedId` has been moved from. It will keep its value. The only difference is just that it is no longer responsible for destroying the id when it goes out of scope.
 
 ### Thread safety
 
@@ -271,8 +245,8 @@ Note that this removes the type-safety of a `reg::Id` and is intended to only be
 
 ```cpp
 auto       registry = reg::Registry<float>{};
-const auto id       = registry.create(1.f);
-const auto any_id   = reg::AnyId{id};
+auto const id       = registry.create(1.f);
+auto const any_id   = reg::AnyId{id};
 assert(id == any_id); // They can be compared
 ```
 
@@ -288,23 +262,23 @@ assert(id == any_id); // They can be compared
     >;
     Registries registries{};
 
-    const reg::Registry<int>& const_registry = registries.of<int>(); // You can access each of the registries
-          reg::Registry<int>&       registry = registries.of<int>(); // with of<T>()
+    reg::Registry<int> const& const_registry = registries.of<int>(); // You can access each of the registries
+    reg::Registry<int>&       registry       = registries.of<int>(); // with of<T>()
 ```
 
 As a convenience, `reg::Registries` provides the thread-safe functions of a `reg::Registry` and will automatically call them on the right registry:
 
 ```cpp
-    using Registries = reg::Registries<
-        reg::Registry<int>,
-        reg::Registry<float>,
-        reg::Registry<double>
-    >;
+using Registries = reg::Registries<
+    reg::Registry<int>,
+    reg::Registry<float>,
+    reg::Registry<double>
+>;
 Registries registries{};
 
-const auto id = registries.create(5.f);             //
-const auto id = registries.create<float>(5.f);      // Those 3 lines are equivalent
-const auto id = registries.of<float>().create(5.f); //
+auto const id = registries.create_unique(5.f);             //
+auto const id = registries.create_unique<float>(5.f);      // Those 3 lines are equivalent
+auto const id = registries.of<float>().create_unique(5.f); //
 ```
 
 ### `to_string()`
@@ -313,7 +287,7 @@ Allows you to convert a `reg::Id<T>` or a `reg:AnyId` to their string representa
 
 ```cpp
 auto registry = reg::Registry<float>{};
-const auto id = registry.create(1.f);
+auto const id = registry.create_unique(1.f);
 std::cout << reg::to_string(id) << '\n'; // "00020b79-be62-4749-95f9-938b042f3b6e"
 ```
 
@@ -358,12 +332,6 @@ Pointers and references are tied to an address in memory, which is something tha
 Even during the lifetime of the application pointers can get invalidated. For example if you store some objects in a `std::vector`, and then later on add one more object to that vector it might need to resize, which will make all the objects it contains move to a new location in memory. If you had pointers pointing to the objects in the vector they will now be dangling!
 
 And references (&) suffer from the exact same problems.
-
-### We don't provide automatic lifetime management
-
-We don't provide `unique_ptr`-like or `shared_ptr`-like functionnalities because you don't want all your objects to be removed from the registry when the application shuts down and everything gets destroyed.
-
-If a given registry doesn't need to be serialized then we could provide those functionalities for it. But if you don't need serialization then you can get all of the other benefits of a registry by simply using a `std::unique_ptr` or a `std::shared_ptr`; there would be no advantage to using a registry. (Or am I wrong?)
 
 ### Performance is not our main concern
 

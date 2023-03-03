@@ -23,12 +23,12 @@ void load_minimal(Archive const&, uuids::uuid& uuid, std::string const& value)
 }
 
 template<class Archive, typename T>
-auto save_minimal(Archive const& ar, reg::Id<T> const& id) -> std::string
+auto save_minimal(Archive const& ar, reg::RawId<T> const& id) -> std::string
 {
     return save_minimal(ar, id.underlying_uuid());
 }
 template<class Archive, typename T>
-void load_minimal(Archive const& ar, reg::Id<T>& id, std::string const& value)
+void load_minimal(Archive const& ar, reg::RawId<T>& id, std::string const& value)
 {
     load_minimal(ar, id.underlying_uuid(), value);
 }

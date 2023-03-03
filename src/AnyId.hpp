@@ -7,15 +7,15 @@ namespace reg {
 class AnyId {
 public:
     AnyId() = default;
-    AnyId(uuids::uuid const& uuid)
+    AnyId(uuids::uuid const& uuid) // NOLINT(*-explicit-constructor, *-explicit-conversions)
         : _uuid{uuid}
     {}
     template<typename T>
-    AnyId(Id<T> const& id)
+    AnyId(Id<T> const& id) // NOLINT(*-explicit-constructor, *-explicit-conversions)
         : _uuid{id._uuid}
     {}
     template<typename T>
-    AnyId(Id<T>&& id) noexcept
+    AnyId(Id<T>&& id) noexcept // NOLINT(*-explicit-constructor, *-explicit-conversions)
         : _uuid{std::move(id._uuid)}
     {}
     template<typename T>
@@ -32,7 +32,7 @@ public:
     }
 
     template<typename T>
-    operator Id<T>() const
+    operator Id<T>() const // NOLINT(*-explicit-constructor, *-explicit-conversions)
     {
         return Id<T>{_uuid};
     }
@@ -50,8 +50,8 @@ public:
         return id2 == id1;
     }
 
-    auto underlying_uuid() -> uuids::uuid& { return _uuid; }
-    auto underlying_uuid() const -> uuids::uuid const& { return _uuid; }
+    [[nodiscard]] auto underlying_uuid() -> uuids::uuid& { return _uuid; }
+    [[nodiscard]] auto underlying_uuid() const -> uuids::uuid const& { return _uuid; }
 
 private:
     friend std::hash<AnyId>;

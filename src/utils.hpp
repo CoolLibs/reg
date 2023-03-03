@@ -5,13 +5,7 @@
 
 namespace reg {
 
-inline auto to_string(const AnyId& id) -> std::string
-{
-    return uuids::to_string(id.underlying_uuid());
-}
-
-template<typename T>
-auto to_string(const Id<T>& id) -> std::string
+inline auto to_string(AnyId const& id) -> std::string
 {
     return uuids::to_string(id.underlying_uuid());
 }

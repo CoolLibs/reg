@@ -25,12 +25,12 @@ TEST_CASE_TEMPLATE("Querying a registry with an uninitialized id returns a null 
     REQUIRE(!registry.get_mutable_ref(reg::Id<int>{}));
 }
 
-TEST_CASE_TEMPLATE("Trying to erase an uninitialized id is valid and does nothing", Registry, reg::Registry<char>, reg::OrderedRegistry<char>)
+TEST_CASE_TEMPLATE("Trying to erase an uninitialized id is valid and does nothing", RawRegistry, reg::internal::RawRegistry<char, std::unordered_map<reg::Id<char>, char>>, reg::internal::RawRegistry<char, reg::internal::OrderPreservingMap<reg::Id<char>, char>>)
 {
-    auto       registry = Registry{};
-    const auto idA      = registry.create('a');
-    const auto idB      = registry.create('b');
-    const auto idC      = registry.create('c');
+    auto       registry = RawRegistry{};
+    auto const idA      = registry.create_raw('a');
+    auto const idB      = registry.create_raw('b');
+    auto const idC      = registry.create_raw('c');
 
     registry.destroy(reg::Id<char>{});
 
@@ -44,45 +44,45 @@ TEST_CASE_TEMPLATE("IDs are unique, even across registries", Registry, reg::Regi
 {
     auto       registry1 = Registry{};
     auto       registry2 = Registry{};
-    const auto id11      = registry1.create(2.f);
-    const auto id12      = registry1.create(2.f);
-    const auto id13      = registry1.create(1.f);
-    const auto id21      = registry2.create(1.f);
-    const auto id22      = registry2.create(1.f);
-    const auto id23      = registry2.create(2.f);
+    auto const id11      = registry1.create_unique(2.f);
+    auto const id12      = registry1.create_unique(2.f);
+    auto const id13      = registry1.create_unique(1.f);
+    auto const id21      = registry2.create_unique(1.f);
+    auto const id22      = registry2.create_unique(1.f);
+    auto const id23      = registry2.create_unique(2.f);
 
-    REQUIRE(id11 == id11);
-    REQUIRE(id11 != id12);
-    REQUIRE(id11 != id13);
-    REQUIRE(id12 != id13);
-    REQUIRE(id21 != id22);
-    REQUIRE(id21 != id23);
-    REQUIRE(id22 != id23);
+    REQUIRE(id11.get() == id11.get());
+    REQUIRE(id11.get() != id12.get());
+    REQUIRE(id11.get() != id13.get());
+    REQUIRE(id12.get() != id13.get());
+    REQUIRE(id21.get() != id22.get());
+    REQUIRE(id21.get() != id23.get());
+    REQUIRE(id22.get() != id23.get());
 
-    REQUIRE(id11 != id21);
-    REQUIRE(id11 != id22);
-    REQUIRE(id11 != id23);
-    REQUIRE(id12 != id21);
-    REQUIRE(id12 != id22);
-    REQUIRE(id12 != id23);
-    REQUIRE(id13 != id21);
-    REQUIRE(id13 != id22);
-    REQUIRE(id13 != id23);
+    REQUIRE(id11.get() != id21.get());
+    REQUIRE(id11.get() != id22.get());
+    REQUIRE(id11.get() != id23.get());
+    REQUIRE(id12.get() != id21.get());
+    REQUIRE(id12.get() != id22.get());
+    REQUIRE(id12.get() != id23.get());
+    REQUIRE(id13.get() != id21.get());
+    REQUIRE(id13.get() != id22.get());
+    REQUIRE(id13.get() != id23.get());
 }
 
 TEST_CASE_TEMPLATE("An AnyId is equal to the Id it was created from", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
     auto       registry = Registry{};
-    const auto id1      = registry.create(1.f);
-    const auto id2      = registry.create(2.f);
-    const auto any_id1  = reg::AnyId{id1};
-    const auto any_id2  = reg::AnyId{id2};
+    auto const id1      = registry.create_unique(1.f);
+    auto const id2      = registry.create_unique(2.f);
+    auto const any_id1  = reg::AnyId{id1};
+    auto const any_id2  = reg::AnyId{id2};
 
-    REQUIRE(id1 == any_id1);
-    REQUIRE(any_id1 == id1);
-    REQUIRE(id2 == any_id2);
-    REQUIRE(id1 != any_id2);
-    REQUIRE(any_id1 != id2);
+    REQUIRE(id1.get() == any_id1);
+    REQUIRE(any_id1 == id1.get());
+    REQUIRE(id2.get() == any_id2);
+    REQUIRE(id1.get() != any_id2);
+    REQUIRE(any_id1 != id2.get());
     REQUIRE(any_id1 != any_id2);
     REQUIRE(!(any_id1 == any_id2));
 }
@@ -90,11 +90,11 @@ TEST_CASE_TEMPLATE("An AnyId is equal to the Id it was created from", Registry, 
 TEST_CASE_TEMPLATE("Getting an object", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
     auto       registry = Registry{};
-    const auto id       = registry.create(17.f);
+    auto const id       = registry.create_unique(17.f);
 
     SUBCASE("get()")
     {
-        const auto value = registry.get(id);
+        auto const value = registry.get(id);
 
         REQUIRE(value);
         REQUIRE(*value == 17.f);
@@ -116,7 +116,7 @@ TEST_CASE_TEMPLATE("Getting an object", Registry, reg::Registry<float>, reg::Ord
     SUBCASE("get_ref()")
     {
         std::shared_lock  lock{registry.mutex()};
-        const auto* const value = registry.get_ref(id);
+        auto const* const value = registry.get_ref(id);
 
         REQUIRE(value);
         REQUIRE(*value == 17.f);
@@ -134,7 +134,7 @@ TEST_CASE_TEMPLATE("Getting an object", Registry, reg::Registry<float>, reg::Ord
 TEST_CASE_TEMPLATE("Setting an object", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
     auto       registry = Registry{};
-    const auto id       = registry.create(17.f);
+    auto const id       = registry.create_unique(17.f);
 
     SUBCASE("set()")
     {
@@ -161,11 +161,11 @@ TEST_CASE_TEMPLATE("Setting an object", Registry, reg::Registry<float>, reg::Ord
     }
 }
 
-TEST_CASE_TEMPLATE("Objects can be created, retrieved and destroyed", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
+TEST_CASE_TEMPLATE("Objects can be created and retrieved", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
     auto registry = Registry{};
 
-    const auto id1 = registry.create(153.f);
+    auto const id1 = registry.create_unique(153.f);
     REQUIRE(size(registry) == 1);
     {
         const std::optional<float> value1 = registry.get(id1);
@@ -173,33 +173,14 @@ TEST_CASE_TEMPLATE("Objects can be created, retrieved and destroyed", Registry, 
         REQUIRE(*value1 == 153.f);
     }
 
-    const auto id2 = registry.create(10.f);
-    REQUIRE(id2 != id1);
+    auto const id2 = registry.create_unique(10.f);
+    REQUIRE(id2.get() != id1.get());
     REQUIRE(size(registry) == 2);
     {
-        const auto value1 = registry.get(id1);
-        const auto value2 = registry.get(id2);
+        auto const value1 = registry.get(id1);
+        auto const value2 = registry.get(id2);
         REQUIRE(value1);
         REQUIRE(*value1 == 153.f);
-        REQUIRE(value2);
-        REQUIRE(*value2 == 10.f);
-    }
-
-    registry.destroy(id1);
-    REQUIRE(size(registry) == 1);
-    {
-        const auto value1 = registry.get(id1);
-        const auto value2 = registry.get(id2);
-        REQUIRE(!value1);
-        REQUIRE(value2);
-        REQUIRE(*value2 == 10.f);
-    }
-    registry.destroy(id1);
-    REQUIRE(size(registry) == 1);
-    {
-        const auto value1 = registry.get(id1);
-        const auto value2 = registry.get(id2);
-        REQUIRE(!value1);
         REQUIRE(value2);
         REQUIRE(*value2 == 10.f);
     }
@@ -208,12 +189,12 @@ TEST_CASE_TEMPLATE("Objects can be created, retrieved and destroyed", Registry, 
 TEST_CASE_TEMPLATE("You can iterate over the ids and values in the registry", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
     auto       registry = Registry{};
-    const auto my_value = 1.f;
-    const auto my_id    = registry.create(my_value);
+    auto const my_value = 1.f;
+    auto const my_id    = registry.create_unique(my_value);
 
     std::shared_lock lock{registry.mutex()};
 
-    for (const auto& [id, value] : registry)
+    for (auto const& [id, value] : registry)
     {
         assert(id == my_id);       // Can't use doctest's REQUIRE() because of a weird interaction between lambda captures and structured bindings :'( https://github.com/doctest/doctest/issues/279
         assert(value == my_value); // Same
@@ -225,12 +206,12 @@ TEST_CASE_TEMPLATE("You can iterate over the ids and values in the registry", Re
 
 TEST_CASE_TEMPLATE("Locking manually", Registry, reg::Registry<std::vector<float>>, reg::OrderedRegistry<std::vector<float>>)
 {
-    auto       registry = Registry{};                                          // Our registry is storing big objects
-    const auto id       = registry.create(std::vector<float>(10000000, 15.f)); // so we will want to avoid copying them
+    auto       registry = Registry{};                                                 // Our registry is storing big objects
+    auto const id       = registry.create_unique(std::vector<float>(10000000, 15.f)); // so we will want to avoid copying them
     {
         std::shared_lock lock{registry.mutex()}; // I only want to read so I can use a shared_lock
 
-        const auto* const vec_ref = registry.get_ref(id);
+        auto const* const vec_ref = registry.get_ref(id);
         REQUIRE(vec_ref);
         REQUIRE(vec_ref->size() == 10000000);
         REQUIRE((*vec_ref)[0] == 15.f);
@@ -244,12 +225,12 @@ TEST_CASE_TEMPLATE("Locking manually", Registry, reg::Registry<std::vector<float
         REQUIRE((*registry.get_ref(id))[17] == 21.f);
     }
 
-    const auto id2 = registry.create(std::vector<float>(20, 21.f));
+    auto const id2 = registry.create_unique(std::vector<float>(20, 21.f));
 
     {
         std::shared_lock lock{registry.mutex()}; // I only want to read so I can use a shared_lock
 
-        for (const auto& kv : registry)
+        for (auto const& kv : registry)
         {
             REQUIRE(kv.second[0] > 0.f); // Some silly thing, this is just an example of how you would read values
         }
@@ -277,22 +258,22 @@ TEST_CASE("Registries allows you to access the underlying registries by type")
 
     {
         reg::Registry<int>&       registry       = registries.of<int>();
-        const reg::Id<int>        id             = registry.create(3);
-        const reg::Registry<int>& const_registry = registries.of<int>();
+        reg::UniqueId<int> const  id             = registry.create_unique(3);
+        reg::Registry<int> const& const_registry = registries.of<int>();
         REQUIRE(const_registry.get(id) == 3);
     }
 
     {
         reg::Registry<float>&       registry       = registries.of<float>();
-        const reg::Id<float>        id             = registry.create(3.f);
-        const reg::Registry<float>& const_registry = registries.of<float>();
+        reg::UniqueId<float> const  id             = registry.create_unique(3.f);
+        reg::Registry<float> const& const_registry = registries.of<float>();
         REQUIRE(const_registry.get(id) == 3.f);
     }
 
     {
         reg::Registry<double>&       registry       = registries.of<double>();
-        const reg::Id<double>        id             = registry.create(3.);
-        const reg::Registry<double>& const_registry = registries.of<double>();
+        reg::UniqueId<double> const  id             = registry.create_unique(3.);
+        reg::Registry<double> const& const_registry = registries.of<double>();
         REQUIRE(const_registry.get(id) == 3.);
     }
 }
@@ -305,12 +286,10 @@ TEST_CASE_TEMPLATE("Registries expose the thread-safe functions of the underlyin
         reg::Registry<double>>;
     Registries registries{};
     {
-        const auto id = registries.create(5);
-        REQUIRE(registries.get(id) == 5);
-        registries.set(id, 7);
-        REQUIRE(registries.get(id) == 7);
-        registries.destroy(id);
-        REQUIRE(!registries.get(id));
+        auto const id = registries.create_unique(5);
+        REQUIRE(registries.get(id.get()) == 5);
+        registries.set(id.get(), 7);
+        REQUIRE(registries.get(id.get()) == 7);
     }
 }
 
@@ -318,38 +297,36 @@ TEST_CASE_TEMPLATE("is_empty()", Registry, reg::Registry<float>, reg::OrderedReg
 {
     auto registry = Registry{};
     CHECK(registry.is_empty());
-    const auto id = registry.create(3.f);
-    CHECK(!registry.is_empty());
-    registry.destroy(id);
+    {
+        auto const id = registry.create_unique(3.f);
+        CHECK(!registry.is_empty());
+    }
     CHECK(registry.is_empty());
 }
 
 TEST_CASE_TEMPLATE("clear()", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
     auto registry = Registry{};
-    std::ignore   = registry.create(3.f);
-    std::ignore   = registry.create(4.f);
+    std::ignore   = registry.create_unique(3.f);
+    std::ignore   = registry.create_unique(4.f);
     registry.clear();
     CHECK(size(registry) == 0);
 }
 
 TEST_CASE_TEMPLATE(
-    "ScopedId", RegistryAndId,
-    std::tuple<reg::Registry<float>, reg::ScopedId<float>>, // We use this tuple trick to run the test on pairs of types (the Registry and the corresponding ScopedId)
-    std::tuple<reg::OrderedRegistry<float>, reg::ScopedId_Ordered<float>>
+    "UniqueId", Registry,
+    reg::Registry<float>,
+    reg::OrderedRegistry<float>
 )
 {
-    using Registry = typename std::tuple_element<0, RegistryAndId>::type;
-    using ScopedId = typename std::tuple_element<1, RegistryAndId>::type;
-
     auto registry = Registry{};
     REQUIRE(registry.is_empty());
 
-    SUBCASE("The destructor of ScopedId automatically deletes the id it was owning.")
+    SUBCASE("The destructor of UniqueId automatically deletes the id it was owning.")
     {
         {
-            const auto scoped_id = ScopedId{registry, 3.f};
-            REQUIRE(*registry.get(scoped_id) == 3.f);
+            auto const unique_id = registry.create_unique(3.f);
+            REQUIRE(*registry.get(unique_id) == 3.f);
         }
         CHECK(registry.is_empty());
     }
@@ -360,30 +337,30 @@ TEST_CASE_TEMPLATE(
 #pragma GCC diagnostic   push
 #pragma GCC diagnostic   ignored "-Wpessimizing-move"
 
-    SUBCASE("Move-assigning a ScopedId transfers ownership.")
+    SUBCASE("Move-assigning a UniqueId transfers ownership.")
     {
         {
-            auto final_scope = ScopedId{};
+            auto final_scope = reg::UniqueId<float>{};
             {
-                auto tmp_scope = ScopedId{registry, 3.f};
+                auto tmp_scope = registry.create_unique(3.f);
                 REQUIRE(*registry.get(tmp_scope) == 3.f);
                 final_scope = std::move(tmp_scope);
-            } // Destructor of tmp_scope is called but shouldn't do anything
+            } // Destructor of tmp_scope is called here but shouldn't do anything
             REQUIRE(*registry.get(final_scope) == 3.f);
-        } // Destructor of final_scope is called and should destroy the id
+        } // Destructor of final_scope is called here and should destroy the id
         CHECK(registry.is_empty());
     }
 
-    SUBCASE("Move-constructing a ScopedId transfers ownership.")
+    SUBCASE("Move-constructing a UniqueId transfers ownership.")
     {
         {
-            const auto final_scoped_id = [&]() {
-                auto tmp_scoped_id = ScopedId{registry, 3.f}; // Can't be const if we want to move from it
-                REQUIRE(*registry.get(tmp_scoped_id) == 3.f);
-                return std::move(tmp_scoped_id); // Force a move, don't rely on copy-elision as this is not what we want to test
-            }();                                 // Destructor of tmp_scope is called but shouldn't do anything
-            REQUIRE(*registry.get(final_scoped_id) == 3.f);
-        } // Destructor of final_scope is called and should destroy the id
+            auto const final_scope = [&]() {
+                auto tmp_scope = registry.create_unique(3.f); // Can't be const if we want to move from it
+                REQUIRE(*registry.get(tmp_scope) == 3.f);
+                return std::move(tmp_scope); // Force a move, don't rely on copy-elision as this is not what we want to test
+            }();                             // Destructor of tmp_scope is called here but shouldn't do anything
+            REQUIRE(*registry.get(final_scope) == 3.f);
+        } // Destructor of final_scope is called here and should destroy the id
         CHECK(registry.is_empty());
     }
 

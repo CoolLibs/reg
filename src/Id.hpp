@@ -3,6 +3,11 @@
 
 namespace reg {
 
+namespace internal {
+template<typename SomeType, typename Map>
+class RawRegistry;
+}
+
 template<typename T>
 class Id {
 public:
@@ -12,20 +17,21 @@ public:
 
     friend auto operator<=>(const Id<T>&, const Id<T>&) = default;
 
-    auto underlying_uuid() -> uuids::uuid& { return _uuid; }
-    auto underlying_uuid() const -> const uuids::uuid& { return _uuid; }
+    [[nodiscard]] auto underlying_uuid() -> uuids::uuid& { return _uuid; }
+    [[nodiscard]] auto underlying_uuid() const -> uuids::uuid const& { return _uuid; }
 
 private:
     template<typename SomeType, typename Map>
-    friend class RegistryImpl;
+    friend class internal::RawRegistry;
     friend class AnyId;
     friend std::hash<Id<T>>;
 
-    explicit Id(const uuids::uuid& uuid) // Only a Registry<T> is allowed to create a non-nil ID
+    explicit Id(uuids::uuid const& uuid) // Only a RawRegistry<T> is allowed to create a non-nil ID
         : _uuid{uuid}
     {
     }
 
+private:
     uuids::uuid _uuid{};
 };
 
@@ -33,8 +39,8 @@ private:
 
 namespace std {
 template<typename T>
-struct hash<reg::Id<T>> {
-    size_t operator()(const reg::Id<T>& id) const
+struct hash<reg::Id<T>> { // NOLINT(cert-dcl58-cpp)
+    auto operator()(const reg::Id<T>& id) const -> size_t
     {
         return std::hash<uuids::uuid>{}(id._uuid);
     }

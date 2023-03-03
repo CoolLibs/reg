@@ -116,7 +116,11 @@ public:
     /// This is only required when using functions that are not already thread-safe: get_ref(), get_mutable_ref(), begin(), end(), cbegin() and cend() (and therefore also using a range-based for loop on this registry).
     /// You should use a std::unique_lock if you want to modify some values, and std::shared_lock if you only need to read them.
     /// See https://stackoverflow.com/a/46050121/15432269 for more details about shared mutexes.
-    [[nodiscard]] auto mutex() const -> std::shared_mutex& { return of<T>().mutex(); }
+    template<typename T>
+    [[nodiscard]] auto mutex() const -> std::shared_mutex&
+    {
+        return of<T>().mutex();
+    }
 
     using Tuple = std::tuple<Ts...>;
 

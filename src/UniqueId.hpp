@@ -14,7 +14,7 @@ class UniqueId {
 public:
     UniqueId() = default;
 
-    auto get() const -> Id<T> { return _id_destroyer ? _id_destroyer->id() : Id<T>{}; } // TODO(JF) Rename as raw()?
+    auto raw() const -> Id<T> { return _id_destroyer ? _id_destroyer->id() : Id<T>{}; }
 
 public:
     /// This function is only meant to be called by the implementation.

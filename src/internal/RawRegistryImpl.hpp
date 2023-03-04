@@ -1,4 +1,5 @@
 #pragma once
+#include <mutex>
 #include <optional>
 #include <shared_mutex>
 #include "../Id.hpp"

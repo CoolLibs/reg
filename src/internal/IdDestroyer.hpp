@@ -2,7 +2,7 @@
 #include <functional>
 #include <variant>
 #include "../Id.hpp"
-#include "RawRegistry.hpp"
+#include "../RawRegistry.hpp"
 
 namespace reg::internal {
 

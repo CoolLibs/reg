@@ -1,7 +1,7 @@
 #pragma once
 #include "../SharedId.hpp"
 #include "../UniqueId.hpp"
-#include "RawRegistry.hpp"
+#include "RawRegistryImpl.hpp"
 
 namespace reg::internal {
 

@@ -232,12 +232,14 @@ You can iterate over all the objects in the registry, but the order is not guara
 
 ### Manual lifetime management
 
-You can also create a non-owned id with `create_raw()`. You will then have to destroy the object manually by calling `destroy()` whenever you want.
+You can also create a non-owning id with `create_raw()`. You will then have to destroy the object manually by calling `destroy()` whenever you want.
 
 ```cpp
 reg::Id<float> id = registry.create_raw(1.f);
 registry.destroy(id);
 ```
+
+If you will never need the unique / shared ids, you can create a `RawRegistry` instead of a `Registry`. This type is slightly more lightweight but doesn't provide `create_unique()` and `create_shared()`, it only has `create_raw()`.
 
 ### Thread safety
 

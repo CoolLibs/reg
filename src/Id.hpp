@@ -5,7 +5,7 @@ namespace reg {
 
 namespace internal {
 template<typename SomeType, typename Map>
-class RawRegistry;
+class RawRegistryImpl;
 }
 
 template<typename T>
@@ -22,7 +22,7 @@ public:
 
 private:
     template<typename SomeType, typename Map>
-    friend class internal::RawRegistry;
+    friend class internal::RawRegistryImpl;
     friend class AnyId;
     friend std::hash<Id<T>>;
 

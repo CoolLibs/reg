@@ -7,7 +7,7 @@
 namespace reg::internal {
 
 template<typename T>
-using AnyRawRegistry = std::variant<std::weak_ptr<RawUsualRegistry<T>>, std::weak_ptr<RawOrderedRegistry<T>>>;
+using AnyRawRegistry = std::variant<std::weak_ptr<RawRegistry<T>>, std::weak_ptr<RawOrderedRegistry<T>>>;
 
 /// Responsible for destroying the id automatically when it goes out of scope.
 /// It does so by using the `destroy` function that you have to pass to it (this

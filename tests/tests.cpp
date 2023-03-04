@@ -25,9 +25,9 @@ TEST_CASE_TEMPLATE("Querying a registry with an uninitialized id returns a null 
     REQUIRE(!registry.get_mutable_ref(reg::Id<int>{}));
 }
 
-TEST_CASE_TEMPLATE("Trying to erase an uninitialized id is valid and does nothing", RawRegistry, reg::internal::RawRegistry<char, std::unordered_map<reg::Id<char>, char>>, reg::internal::RawRegistry<char, reg::internal::OrderPreservingMap<reg::Id<char>, char>>)
+TEST_CASE_TEMPLATE("Trying to erase an uninitialized id is valid and does nothing", Registry, reg::Registry<char>, reg::OrderedRegistry<char>)
 {
-    auto       registry = RawRegistry{};
+    auto       registry = Registry{};
     auto const idA      = registry.create_raw('a');
     auto const idB      = registry.create_raw('b');
     auto const idC      = registry.create_raw('c');
@@ -161,7 +161,7 @@ TEST_CASE_TEMPLATE("Setting an object", Registry, reg::Registry<float>, reg::Ord
     }
 }
 
-TEST_CASE_TEMPLATE("Objects can be created and retrieved", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
+TEST_CASE_TEMPLATE("Objects can be created, retrieved and destroyed", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
 {
     auto registry = Registry{};
 
@@ -181,6 +181,25 @@ TEST_CASE_TEMPLATE("Objects can be created and retrieved", Registry, reg::Regist
         auto const value2 = registry.get(id2.raw());
         REQUIRE(value1);
         REQUIRE(*value1 == 153.f);
+        REQUIRE(value2);
+        REQUIRE(*value2 == 10.f);
+    }
+
+    registry.destroy(id1.raw());
+    REQUIRE(size(registry) == 1);
+    {
+        const auto value1 = registry.get(id1.raw());
+        const auto value2 = registry.get(id2.raw());
+        REQUIRE(!value1);
+        REQUIRE(value2);
+        REQUIRE(*value2 == 10.f);
+    }
+    registry.destroy(id1.raw());
+    REQUIRE(size(registry) == 1);
+    {
+        const auto value1 = registry.get(id1.raw());
+        const auto value2 = registry.get(id2.raw());
+        REQUIRE(!value1);
         REQUIRE(value2);
         REQUIRE(*value2 == 10.f);
     }
@@ -285,12 +304,13 @@ TEST_CASE_TEMPLATE("Registries expose the thread-safe functions of the underlyin
         reg::Registry<int>,
         reg::Registry<double>>;
     Registries registries{};
-    {
-        auto const id = registries.create_unique(5);
-        REQUIRE(registries.get(id.raw()) == 5);
-        registries.set(id.raw(), 7);
-        REQUIRE(registries.get(id.raw()) == 7);
-    }
+
+    auto const id = registries.create_unique(5);
+    REQUIRE(registries.get(id.raw()) == 5);
+    registries.set(id.raw(), 7);
+    REQUIRE(registries.get(id.raw()) == 7);
+    registries.destroy(id.raw());
+    REQUIRE(!registries.get(id.raw()));
 }
 
 TEST_CASE_TEMPLATE("is_empty()", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)

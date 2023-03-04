@@ -1,28 +1,24 @@
 #pragma once
 #include <optional>
 #include <shared_mutex>
-#include <unordered_map>
 #include "../Id.hpp"
-#include "OrderPreservingMap.hpp"
 #include "generate_uuid.hpp"
 
 namespace reg::internal {
 
-/// A `RawRegistry` has all the interface of a Registry
-/// except it doesn't have `create_unique()` and `create_shared()`.
 template<typename T, typename Map>
-class RawRegistry {
+class RawRegistryImpl {
 public:
     /// The type of values stored in this registry.
     using ValueType = T;
 
-    RawRegistry()                                          = default;
-    ~RawRegistry()                                         = default;
-    RawRegistry(RawRegistry&&) noexcept                    = default;
-    auto operator=(RawRegistry&&) noexcept -> RawRegistry& = default;
+    RawRegistryImpl()                                              = default;
+    ~RawRegistryImpl()                                             = default;
+    RawRegistryImpl(RawRegistryImpl&&) noexcept                    = default;
+    auto operator=(RawRegistryImpl&&) noexcept -> RawRegistryImpl& = default;
 
-    RawRegistry(RawRegistry const&)                    = delete; // This class is non-copyable
-    auto operator=(RawRegistry const&) -> RawRegistry& = delete; // because it is the unique owner of the objects it stores
+    RawRegistryImpl(RawRegistryImpl const&)                    = delete; // This class is non-copyable
+    auto operator=(RawRegistryImpl const&) -> RawRegistryImpl& = delete; // because it is the unique owner of the objects it stores
 
     [[nodiscard]] auto get(Id<T> const& id) const -> std::optional<T>
     {
@@ -140,11 +136,5 @@ private:
     Map                       _map;
     mutable std::shared_mutex _mutex;
 };
-
-template<typename T>
-using RawUsualRegistry = RawRegistry<T, std::unordered_map<Id<T>, T>>;
-
-template<typename T>
-using RawOrderedRegistry = RawRegistry<T, internal::OrderPreservingMap<Id<T>, T>>;
 
 } // namespace reg::internal

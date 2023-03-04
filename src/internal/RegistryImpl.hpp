@@ -8,18 +8,18 @@ namespace reg::internal {
 /// Wraps a `RawRegistry` and makes sure its address is always the same in memory.
 /// It has the whole interface of a Registry and can be configured to use whichever `Map` type you want.
 template<typename T, typename Map>
-class RawRegistryWrapper {
+class RegistryImpl {
 public:
     /// The type of values stored in this registry.
     using ValueType = T;
 
-    RawRegistryWrapper()                                                 = default;
-    ~RawRegistryWrapper()                                                = default;
-    RawRegistryWrapper(RawRegistryWrapper&&) noexcept                    = default;
-    auto operator=(RawRegistryWrapper&&) noexcept -> RawRegistryWrapper& = default;
+    RegistryImpl()                                           = default;
+    ~RegistryImpl()                                          = default;
+    RegistryImpl(RegistryImpl&&) noexcept                    = default;
+    auto operator=(RegistryImpl&&) noexcept -> RegistryImpl& = default;
 
-    RawRegistryWrapper(RawRegistryWrapper const&)                    = delete; // This class is non-copyable
-    auto operator=(RawRegistryWrapper const&) -> RawRegistryWrapper& = delete; // because it is the unique owner of the objects it stores
+    RegistryImpl(RegistryImpl const&)                    = delete; // This class is non-copyable
+    auto operator=(RegistryImpl const&) -> RegistryImpl& = delete; // because it is the unique owner of the objects it stores
 
     /// Thread-safe.
     /// Returns the value of the objet referenced by `id`, or null if the `id` doesn't refer to a an object in this registry.
@@ -146,7 +146,7 @@ public:
     [[nodiscard]] auto underlying_wrapped_registry() -> auto& { return _wrapped; }
 
 private:
-    std::shared_ptr<internal::RawRegistry<T, Map>> _wrapped = std::make_shared<internal::RawRegistry<T, Map>>();
+    std::shared_ptr<internal::RawRegistryImpl<T, Map>> _wrapped = std::make_shared<internal::RawRegistryImpl<T, Map>>();
 };
 
 } // namespace reg::internal

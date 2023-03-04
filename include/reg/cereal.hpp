@@ -55,13 +55,13 @@ void serialize(Archive& archive, reg::internal::OrderPreservingMap<T, Map>& map)
 }
 
 template<class Archive, typename T, typename Map>
-void serialize(Archive& archive, reg::internal::RawRegistry<T, Map>& registry)
+void serialize(Archive& archive, reg::internal::RawRegistryImpl<T, Map>& registry)
 {
     archive(cereal::make_nvp("Underlying container", registry.underlying_container()));
 }
 
 template<class Archive, typename T, typename Map>
-void serialize(Archive& archive, reg::internal::RawRegistryWrapper<T, Map>& registry)
+void serialize(Archive& archive, reg::internal::RegistryImpl<T, Map>& registry)
 {
     archive(cereal::make_nvp("Underlying registry", registry.underlying_wrapped_registry()));
 }

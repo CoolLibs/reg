@@ -81,13 +81,7 @@ public:
     /// Returns the id that will then be used to reference the object that has just been created.
     [[nodiscard]] auto create_unique(T const& value) -> UniqueId<T>
     {
-        return UniqueId<T>::internal_constructor(
-            _wrapped->create_raw(value),
-            [weak_ptr = std::weak_ptr{_wrapped}](Id<T> const& id) {
-                if (auto shared_ptr = weak_ptr.lock())
-                    shared_ptr->destroy(id);
-            }
-        );
+        return UniqueId<T>::internal_constructor(_wrapped->create_raw(value), _wrapped);
     }
 
     /// Thread-safe.
@@ -95,13 +89,23 @@ public:
     /// Returns the id that will then be used to reference the object that has just been created.
     [[nodiscard]] auto create_shared(T const& value) -> SharedId<T>
     {
-        return SharedId<T>::internal_constructor(
-            _wrapped->create_raw(value),
-            [weak_ptr = std::weak_ptr{_wrapped}](Id<T> const& id) {
-                if (auto shared_ptr = weak_ptr.lock())
-                    shared_ptr->destroy(id);
-            }
-        );
+        return SharedId<T>::internal_constructor(_wrapped->create_raw(value), _wrapped);
+    }
+
+    /// Thread-safe.
+    /// Inserts a copy of `value` into the registry.
+    /// Returns the id that will then be used to reference the object that has just been created.
+    [[nodiscard]] auto create_raw(T const& value) -> Id<T>
+    {
+        return _wrapped->create_raw(value);
+    }
+
+    /// Thread-safe.
+    /// Destroys the object and removes it from the registry.
+    /// From then on, trying to get an object using `id` is still safe but will return null.
+    void destroy(Id<T> const& id)
+    {
+        _wrapped->destroy(id);
     }
 
     /// Thread-safe.
@@ -139,6 +143,7 @@ public:
 
     [[nodiscard]] auto underlying_container() const -> Map const& { return _wrapped->underlying_container(); }
     [[nodiscard]] auto underlying_container() -> Map& { return _wrapped->underlying_container(); }
+    [[nodiscard]] auto underlying_wrapped_registry() -> auto& { return _wrapped; }
 
 private:
     std::shared_ptr<internal::RawRegistry<T, Map>> _wrapped = std::make_shared<internal::RawRegistry<T, Map>>();

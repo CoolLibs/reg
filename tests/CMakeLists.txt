@@ -37,6 +37,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(doctest)
 target_link_libraries(${PROJECT_NAME} PRIVATE doctest::doctest)
 
+# ---Add cereal---
+target_include_directories(${PROJECT_NAME} PRIVATE lib/cereal/include)
+
 # ---Ignore .vscode/settings.json in Git---
 find_package(Git QUIET)
 if(GIT_FOUND)

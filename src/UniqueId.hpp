@@ -14,19 +14,19 @@ class UniqueId {
 public:
     UniqueId() = default;
 
-         operator Id<T>() const { return get(); } // NOLINT(*-explicit-constructor, *-explicit-conversions)
-         operator AnyId() const { return get(); } // NOLINT(*-explicit-constructor, *-explicit-conversions)
-    auto get() const -> Id<T> { return _id_destroyer ? _id_destroyer->id() : Id<T>{}; }
+    auto get() const -> Id<T> { return _id_destroyer ? _id_destroyer->id() : Id<T>{}; } // TODO(JF) Rename as raw()?
 
 public:
     /// This function is only meant to be called by the implementation.
     /// You should use `registry.create_unique()` instead.
-    static auto internal_constructor(Id<T> const& id, std::function<void(Id<T> const&)> destroy)
+    static auto internal_constructor(Id<T> const& id, internal::AnyRawRegistry<T> registry)
     {
         auto ret          = UniqueId<T>{};
-        ret._id_destroyer = std::make_unique<internal::IdDestroyer<T>>(id, destroy);
+        ret._id_destroyer = std::make_unique<internal::IdDestroyer<T>>(id, registry);
         return ret;
     }
+
+    auto underlying_object() -> auto& { return _id_destroyer; }
 
 private:
     std::unique_ptr<internal::IdDestroyer<T>> _id_destroyer{};

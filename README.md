@@ -21,6 +21,7 @@ These references will never get invalidated, even upon restarting your applicati
   - [Owning IDs](#owning-ids)
   - [Checking for the existence of an object](#checking-for-the-existence-of-an-object)
   - [Iterating over all the objects](#iterating-over-all-the-objects)
+  - [Manual lifetime management](#manual-lifetime-management)
   - [Thread safety](#thread-safety)
   - [`AnyId`](#anyid)
   - [`Registries`](#registries)
@@ -227,6 +228,15 @@ You can iterate over all the objects in the registry, but the order is not guara
         // ...
     }
 }
+```
+
+### Manual lifetime management
+
+You can also create a non-owned id with `create_raw()`. You will then have to destroy the object manually by calling `destroy()` whenever you want.
+
+```cpp
+reg::Id<float> id = registry.create_raw(1.f);
+registry.destroy(id);
 ```
 
 ### Thread safety

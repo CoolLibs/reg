@@ -75,8 +75,8 @@ TEST_CASE_TEMPLATE("An AnyId is equal to the Id it was created from", Registry, 
     auto       registry = Registry{};
     auto const id1      = registry.create_unique(1.f);
     auto const id2      = registry.create_unique(2.f);
-    auto const any_id1  = reg::AnyId{id1};
-    auto const any_id2  = reg::AnyId{id2};
+    auto const any_id1  = reg::AnyId{id1.get()};
+    auto const any_id2  = reg::AnyId{id2.get()};
 
     REQUIRE(id1.get() == any_id1);
     REQUIRE(any_id1 == id1.get());
@@ -94,21 +94,21 @@ TEST_CASE_TEMPLATE("Getting an object", Registry, reg::Registry<float>, reg::Ord
 
     SUBCASE("get()")
     {
-        auto const value = registry.get(id);
+        auto const value = registry.get(id.get());
 
         REQUIRE(value);
         REQUIRE(*value == 17.f);
     }
     SUBCASE("with_ref()")
     {
-        const bool object_has_been_found_in_registry = registry.with_ref(id, [](const float& value) {
+        const bool object_has_been_found_in_registry = registry.with_ref(id.get(), [](const float& value) {
             REQUIRE(value == 17.f);
         });
         REQUIRE(object_has_been_found_in_registry);
     }
     SUBCASE("with_mutable_ref()")
     {
-        const bool object_has_been_found_in_registry = registry.with_mutable_ref(id, [](float& value) {
+        const bool object_has_been_found_in_registry = registry.with_mutable_ref(id.get(), [](float& value) {
             REQUIRE(value == 17.f);
         });
         REQUIRE(object_has_been_found_in_registry);
@@ -116,7 +116,7 @@ TEST_CASE_TEMPLATE("Getting an object", Registry, reg::Registry<float>, reg::Ord
     SUBCASE("get_ref()")
     {
         std::shared_lock  lock{registry.mutex()};
-        auto const* const value = registry.get_ref(id);
+        auto const* const value = registry.get_ref(id.get());
 
         REQUIRE(value);
         REQUIRE(*value == 17.f);
@@ -124,7 +124,7 @@ TEST_CASE_TEMPLATE("Getting an object", Registry, reg::Registry<float>, reg::Ord
     SUBCASE("get_mutable_ref()")
     {
         std::unique_lock lock{registry.mutex()};
-        auto* const      value = registry.get_mutable_ref(id);
+        auto* const      value = registry.get_mutable_ref(id.get());
 
         REQUIRE(value);
         REQUIRE(*value == 17.f);
@@ -138,26 +138,26 @@ TEST_CASE_TEMPLATE("Setting an object", Registry, reg::Registry<float>, reg::Ord
 
     SUBCASE("set()")
     {
-        const bool success = registry.set(id, 13.f);
+        const bool success = registry.set(id.get(), 13.f);
         REQUIRE(success);
-        REQUIRE(*registry.get(id) == 13.f);
+        REQUIRE(*registry.get(id.get()) == 13.f);
     }
     SUBCASE("with_mutable_ref()")
     {
-        const bool success = registry.with_mutable_ref(id, [](float& value) {
+        const bool success = registry.with_mutable_ref(id.get(), [](float& value) {
             value = 13.f;
         });
         REQUIRE(success);
-        REQUIRE(*registry.get(id) == 13.f);
+        REQUIRE(*registry.get(id.get()) == 13.f);
     }
     SUBCASE("get_mutable_ref()")
     {
         {
             std::unique_lock lock{registry.mutex()};
-            auto* const      value = registry.get_mutable_ref(id);
+            auto* const      value = registry.get_mutable_ref(id.get());
             *value                 = 13.f;
         }
-        REQUIRE(*registry.get(id) == 13.f);
+        REQUIRE(*registry.get(id.get()) == 13.f);
     }
 }
 
@@ -168,7 +168,7 @@ TEST_CASE_TEMPLATE("Objects can be created and retrieved", Registry, reg::Regist
     auto const id1 = registry.create_unique(153.f);
     REQUIRE(size(registry) == 1);
     {
-        const std::optional<float> value1 = registry.get(id1);
+        const std::optional<float> value1 = registry.get(id1.get());
         REQUIRE(value1);
         REQUIRE(*value1 == 153.f);
     }
@@ -177,8 +177,8 @@ TEST_CASE_TEMPLATE("Objects can be created and retrieved", Registry, reg::Regist
     REQUIRE(id2.get() != id1.get());
     REQUIRE(size(registry) == 2);
     {
-        auto const value1 = registry.get(id1);
-        auto const value2 = registry.get(id2);
+        auto const value1 = registry.get(id1.get());
+        auto const value2 = registry.get(id2.get());
         REQUIRE(value1);
         REQUIRE(*value1 == 153.f);
         REQUIRE(value2);
@@ -196,7 +196,7 @@ TEST_CASE_TEMPLATE("You can iterate over the ids and values in the registry", Re
 
     for (auto const& [id, value] : registry)
     {
-        assert(id == my_id);       // Can't use doctest's REQUIRE() because of a weird interaction between lambda captures and structured bindings :'( https://github.com/doctest/doctest/issues/279
+        assert(id == my_id.get()); // Can't use doctest's REQUIRE() because of a weird interaction between lambda captures and structured bindings :'( https://github.com/doctest/doctest/issues/279
         assert(value == my_value); // Same
         std::ignore = id;
         std::ignore = value;
@@ -211,7 +211,7 @@ TEST_CASE_TEMPLATE("Locking manually", Registry, reg::Registry<std::vector<float
     {
         std::shared_lock lock{registry.mutex()}; // I only want to read so I can use a shared_lock
 
-        auto const* const vec_ref = registry.get_ref(id);
+        auto const* const vec_ref = registry.get_ref(id.get());
         REQUIRE(vec_ref);
         REQUIRE(vec_ref->size() == 10000000);
         REQUIRE((*vec_ref)[0] == 15.f);
@@ -219,10 +219,10 @@ TEST_CASE_TEMPLATE("Locking manually", Registry, reg::Registry<std::vector<float
     {
         std::unique_lock lock{registry.mutex()}; // I want to modify so I need a unique_lock
 
-        auto* const vec_mut_ref = registry.get_mutable_ref(id);
+        auto* const vec_mut_ref = registry.get_mutable_ref(id.get());
         REQUIRE(vec_mut_ref);
         (*vec_mut_ref)[17] = 21.f; // Do mutation
-        REQUIRE((*registry.get_ref(id))[17] == 21.f);
+        REQUIRE((*registry.get_ref(id.get()))[17] == 21.f);
     }
 
     auto const id2 = registry.create_unique(std::vector<float>(20, 21.f));
@@ -243,8 +243,8 @@ TEST_CASE_TEMPLATE("Locking manually", Registry, reg::Registry<std::vector<float
             kv.second[0] = 1.f;
         }
 
-        REQUIRE((*registry.get_ref(id))[0] == 1.f);
-        REQUIRE((*registry.get_ref(id2))[0] == 1.f);
+        REQUIRE((*registry.get_ref(id.get()))[0] == 1.f);
+        REQUIRE((*registry.get_ref(id2.get()))[0] == 1.f);
     }
 }
 
@@ -260,21 +260,21 @@ TEST_CASE("Registries allows you to access the underlying registries by type")
         reg::Registry<int>&       registry       = registries.of<int>();
         reg::UniqueId<int> const  id             = registry.create_unique(3);
         reg::Registry<int> const& const_registry = registries.of<int>();
-        REQUIRE(const_registry.get(id) == 3);
+        REQUIRE(const_registry.get(id.get()) == 3);
     }
 
     {
         reg::Registry<float>&       registry       = registries.of<float>();
         reg::UniqueId<float> const  id             = registry.create_unique(3.f);
         reg::Registry<float> const& const_registry = registries.of<float>();
-        REQUIRE(const_registry.get(id) == 3.f);
+        REQUIRE(const_registry.get(id.get()) == 3.f);
     }
 
     {
         reg::Registry<double>&       registry       = registries.of<double>();
         reg::UniqueId<double> const  id             = registry.create_unique(3.);
         reg::Registry<double> const& const_registry = registries.of<double>();
-        REQUIRE(const_registry.get(id) == 3.);
+        REQUIRE(const_registry.get(id.get()) == 3.);
     }
 }
 
@@ -326,7 +326,7 @@ TEST_CASE_TEMPLATE(
     {
         {
             auto const unique_id = registry.create_unique(3.f);
-            REQUIRE(*registry.get(unique_id) == 3.f);
+            REQUIRE(*registry.get(unique_id.get()) == 3.f);
         }
         CHECK(registry.is_empty());
     }
@@ -343,10 +343,10 @@ TEST_CASE_TEMPLATE(
             auto final_scope = reg::UniqueId<float>{};
             {
                 auto tmp_scope = registry.create_unique(3.f);
-                REQUIRE(*registry.get(tmp_scope) == 3.f);
+                REQUIRE(*registry.get(tmp_scope.get()) == 3.f);
                 final_scope = std::move(tmp_scope);
             } // Destructor of tmp_scope is called here but shouldn't do anything
-            REQUIRE(*registry.get(final_scope) == 3.f);
+            REQUIRE(*registry.get(final_scope.get()) == 3.f);
         } // Destructor of final_scope is called here and should destroy the id
         CHECK(registry.is_empty());
     }
@@ -356,14 +356,46 @@ TEST_CASE_TEMPLATE(
         {
             auto const final_scope = [&]() {
                 auto tmp_scope = registry.create_unique(3.f); // Can't be const if we want to move from it
-                REQUIRE(*registry.get(tmp_scope) == 3.f);
+                REQUIRE(*registry.get(tmp_scope.get()) == 3.f);
                 return std::move(tmp_scope); // Force a move, don't rely on copy-elision as this is not what we want to test
             }();                             // Destructor of tmp_scope is called here but shouldn't do anything
-            REQUIRE(*registry.get(final_scope) == 3.f);
+            REQUIRE(*registry.get(final_scope.get()) == 3.f);
         } // Destructor of final_scope is called here and should destroy the id
         CHECK(registry.is_empty());
     }
 
 #pragma GCC diagnostic   pop
 #pragma clang diagnostic pop
+}
+
+#include <cereal/archives/json.hpp>
+#include <reg/cereal.hpp>
+#include <sstream>
+
+TEST_CASE_TEMPLATE("Serialization()", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
+{
+    // Save
+    auto                       registry  = Registry{};
+    reg::Id<float> const       id        = registry.create_raw(3.f);
+    reg::UniqueId<float> const unique_id = registry.create_unique(3.f);
+    reg::SharedId<float> const shared_id = registry.create_shared(3.f);
+    std::stringstream          ss{};
+    {
+        cereal::JSONOutputArchive out_archive{ss};
+        out_archive(id, unique_id, shared_id);
+    }
+
+    // Load
+    reg::Id<float>       out_id;
+    reg::UniqueId<float> out_unique_id;
+    reg::SharedId<float> out_shared_id;
+    {
+        cereal::JSONInputArchive in_archive{ss};
+        in_archive(out_id, out_unique_id, out_shared_id);
+    }
+
+    // Check
+    CHECK(id == out_id);
+    CHECK(unique_id.get() == out_unique_id.get());
+    CHECK(shared_id.get() == out_shared_id.get());
 }

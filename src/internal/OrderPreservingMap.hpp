@@ -6,12 +6,12 @@ namespace reg::internal {
 template<typename Key, typename Value>
 class OrderPreservingMap {
 public:
-    auto begin() const { return _map.begin(); }
-    auto begin() { return _map.begin(); }
-    auto end() const { return _map.end(); }
-    auto end() { return _map.end(); }
+    [[nodiscard]] auto begin() const { return _map.begin(); }
+    [[nodiscard]] auto begin() { return _map.begin(); }
+    [[nodiscard]] auto end() const { return _map.end(); }
+    [[nodiscard]] auto end() { return _map.end(); }
 
-    auto find(Key const& key) const
+    [[nodiscard]] auto find(Key const& key) const
     {
         for (auto it = begin(); it != end(); ++it)
         {
@@ -21,7 +21,7 @@ public:
         return end();
     }
 
-    auto find(Key const& key)
+    [[nodiscard]] auto find(Key const& key)
     {
         for (auto it = begin(); it != end(); ++it)
         {
@@ -58,8 +58,8 @@ public:
         _map.clear();
     }
 
-    auto underlying_container() const -> std::vector<std::pair<Key, Value>> const& { return _map; }
-    auto underlying_container() -> std::vector<std::pair<Key, Value>>& { return _map; }
+    [[nodiscard]] auto underlying_container() const -> std::vector<std::pair<Key, Value>> const& { return _map; }
+    [[nodiscard]] auto underlying_container() -> std::vector<std::pair<Key, Value>>& { return _map; }
 
 private:
     std::vector<std::pair<Key, Value>> _map;

@@ -1,6 +1,7 @@
 #pragma once
 #include <optional>
 #include <shared_mutex>
+#include <unordered_map>
 #include "../Id.hpp"
 #include "OrderPreservingMap.hpp"
 #include "generate_uuid.hpp"
@@ -8,8 +9,7 @@
 namespace reg::internal {
 
 /// A `RawRegistry` has all the interface of a Registry
-/// except it doesn't have `create_unique()` and `create_shared()`
-/// but it has `create_raw()` and `destroy` instead.
+/// except it doesn't have `create_unique()` and `create_shared()`.
 template<typename T, typename Map>
 class RawRegistry {
 public:
@@ -105,9 +105,6 @@ public:
         return id;
     }
 
-    /// Thread-safe.
-    /// Destroys the object and removes it from the registry.
-    /// From then on, trying to get an object using `id` is still safe but will return null.
     void destroy(Id<T> const& id)
     {
         std::unique_lock lock{_mutex};
@@ -143,5 +140,11 @@ private:
     Map                       _map;
     mutable std::shared_mutex _mutex;
 };
+
+template<typename T>
+using RawUsualRegistry = RawRegistry<T, std::unordered_map<Id<T>, T>>;
+
+template<typename T>
+using RawOrderedRegistry = RawRegistry<T, internal::OrderPreservingMap<Id<T>, T>>;
 
 } // namespace reg::internal

@@ -97,6 +97,24 @@ public:
     }
 
     /// Thread-safe.
+    /// Inserts a copy of `value` into the registry.
+    /// Returns the id that will then be used to reference the object that has just been created.
+    template<typename T>
+    [[nodiscard]] auto create_raw(T const& value) -> Id<T>
+    {
+        return of<T>().create(value);
+    }
+
+    /// Thread-safe.
+    /// Destroys the object and removes it from the registry.
+    /// From then on, trying to get an object using `id` is still safe but will return null.
+    template<typename T>
+    void destroy(Id<T> const& id)
+    {
+        of<T>().destroy(id);
+    }
+
+    /// Thread-safe.
     /// Returns true iff the registry contains no objects at all.
     template<typename T>
     [[nodiscard]] auto is_empty() const -> bool

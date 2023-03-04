@@ -332,8 +332,6 @@ TEST_CASE_TEMPLATE(
     }
 
 #pragma warning(disable : 4068) // "unknown pragma"
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wpessimizing-move"
 #pragma GCC diagnostic   push
 #pragma GCC diagnostic   ignored "-Wpessimizing-move"
 
@@ -364,11 +362,15 @@ TEST_CASE_TEMPLATE(
         CHECK(registry.is_empty());
     }
 
-#pragma GCC diagnostic   pop
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 }
 
+#pragma warning(disable : 5054) // "operator '|': deprecated between enumerations of different types"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <cereal/archives/json.hpp>
+#pragma GCC diagnostic pop
 #include <reg/cereal.hpp>
 #include <sstream>
 

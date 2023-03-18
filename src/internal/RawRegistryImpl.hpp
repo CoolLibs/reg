@@ -102,6 +102,14 @@ public:
         return id;
     }
 
+    [[nodiscard]] auto create_raw(T&& value) -> Id<T>
+    {
+        auto const       id = Id<T>{generate_uuid()};
+        std::unique_lock lock{_mutex};
+        _map.insert({id, std::move(value)});
+        return id;
+    }
+
     void destroy(Id<T> const& id)
     {
         std::unique_lock lock{_mutex};

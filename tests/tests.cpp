@@ -352,8 +352,8 @@ TEST_CASE_TEMPLATE(
     }
 
 #pragma warning(disable : 4068) // "unknown pragma"
-#pragma GCC diagnostic   push
-#pragma GCC diagnostic   ignored "-Wpessimizing-move"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpessimizing-move"
 
     SUBCASE("Move-assigning a UniqueId transfers ownership.")
     {
@@ -386,12 +386,12 @@ TEST_CASE_TEMPLATE(
 }
 
 #pragma warning(disable : 5054) // "operator '|': deprecated between enumerations of different types"
-#pragma GCC diagnostic push
+#pragma GCC diagnostic   push
 #pragma clang diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic   ignored "-Wsign-conversion"
 #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
 #include <cereal/archives/json.hpp>
-#pragma GCC diagnostic pop
+#pragma GCC diagnostic   pop
 #pragma clang diagnostic pop
 #include <reg/cereal.hpp>
 #include <sstream>

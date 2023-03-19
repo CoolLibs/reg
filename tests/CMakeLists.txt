@@ -13,10 +13,7 @@ else()
     )
 endif()
 
-# Maybe enable warnings as errors
-set(WARNINGS_AS_ERRORS_FOR_REG_TESTS OFF CACHE BOOL "ON iff you want to treat warnings as errors") # Might be overriden in the CMake cache
-
-if(WARNINGS_AS_ERRORS_FOR_REG_TESTS)
+if(WARNINGS_AS_ERRORS_FOR_REG)
     if(MSVC)
         target_compile_options(${PROJECT_NAME} PRIVATE /WX)
     else()
@@ -38,7 +35,7 @@ FetchContent_MakeAvailable(doctest)
 target_link_libraries(${PROJECT_NAME} PRIVATE doctest::doctest)
 
 # ---Add cereal---
-target_include_directories(${PROJECT_NAME} PRIVATE lib/cereal/include)
+target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE lib/cereal/include)
 
 # ---Ignore .vscode/settings.json in Git---
 find_package(Git QUIET)

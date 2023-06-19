@@ -29,7 +29,7 @@ public:
     auto underlying_object() -> auto& { return _id_destroyer; }
 
 private:
-    std::unique_ptr<internal::IdDestroyer<T>> _id_destroyer{};
+    std::unique_ptr<internal::IdDestroyer<T>> _id_destroyer{nullptr};
 };
 
 } // namespace reg

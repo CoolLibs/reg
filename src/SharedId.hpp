@@ -28,7 +28,7 @@ public:
     auto underlying_object() -> auto& { return _id_destroyer; }
 
 private:
-    std::shared_ptr<internal::IdDestroyer<T>> _id_destroyer{};
+    std::shared_ptr<internal::IdDestroyer<T>> _id_destroyer{nullptr};
 };
 
 } // namespace reg

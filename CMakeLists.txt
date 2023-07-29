@@ -17,11 +17,12 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*)
 target_sources(reg PRIVATE ${SRC_FILES})
 
 # ---Add stduuid library---
-set(UUID_BUILD_TESTS      OFF CACHE BOOL "")
-set(UUID_TIME_GENERATOR   OFF CACHE BOOL "")
-set(UUID_USING_CXX20_SPAN ON  CACHE BOOL "")
+set(UUID_BUILD_TESTS OFF CACHE BOOL "")
+set(UUID_TIME_GENERATOR OFF CACHE BOOL "")
+set(UUID_USING_CXX20_SPAN ON CACHE BOOL "")
 add_subdirectory(lib/stduuid)
 target_link_libraries(reg PUBLIC stduuid)
+install(FILES "lib/stduuid/LICENSE" DESTINATION "license/stduuid")
 
 # ---Set warning level---
 if(MSVC)

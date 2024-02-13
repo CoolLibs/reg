@@ -96,18 +96,28 @@ public:
 
     [[nodiscard]] auto create_raw(T const& value) -> Id<T>
     {
-        auto const       id = Id<T>{generate_uuid()};
-        std::unique_lock lock{_mutex};
-        _map.insert({id, value});
+        auto const id = Id<T>{generate_uuid()};
+        insert_raw(id, value);
         return id;
     }
 
     [[nodiscard]] auto create_raw(T&& value) -> Id<T>
     {
-        auto const       id = Id<T>{generate_uuid()};
+        auto const id = Id<T>{generate_uuid()};
+        insert_raw(id, std::move(value));
+        return id;
+    }
+
+    void insert_raw(Id<T> const& id, T const& value)
+    {
+        std::unique_lock lock{_mutex};
+        _map.insert({id, value});
+    }
+
+    void insert_raw(Id<T> const& id, T&& value)
+    {
         std::unique_lock lock{_mutex};
         _map.insert({id, std::move(value)});
-        return id;
     }
 
     void destroy(Id<T> const& id)

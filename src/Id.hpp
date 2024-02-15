@@ -12,6 +12,9 @@ template<typename T>
 class Id {
 public:
     Id() = default;
+    explicit Id(uuids::uuid const& uuid)
+        : _uuid{uuid}
+    {}
     /// The type of values referenced by this id.
     using ValueType = T;
 
@@ -25,11 +28,6 @@ private:
     friend class internal::RawRegistryImpl;
     friend class AnyId;
     friend std::hash<Id<T>>;
-
-    explicit Id(uuids::uuid const& uuid) // Only a RawRegistry<T> is allowed to create a non-nil ID
-        : _uuid{uuid}
-    {
-    }
 
 private:
     uuids::uuid _uuid{};

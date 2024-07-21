@@ -24,8 +24,9 @@ endif()
 add_subdirectory(.. ${CMAKE_CURRENT_SOURCE_DIR}/build/reg)
 target_link_libraries(${PROJECT_NAME} PRIVATE reg::reg)
 
-# ---Add doctest---
 include(FetchContent)
+
+# ---Add doctest---
 FetchContent_Declare(
     doctest
     GIT_REPOSITORY https://github.com/doctest/doctest
@@ -34,17 +35,26 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(doctest)
 target_link_libraries(${PROJECT_NAME} PRIVATE doctest::doctest)
 
-# ---Add cereal---
-target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE lib/cereal/include)
+# ---Add ser20---
+FetchContent_Declare(
+    ser20
+    GIT_REPOSITORY https://github.com/royjacobson/ser20
+    GIT_TAG 9ebd7ebba9fb092fdf8690767a4bb3c4fbf06bb4
+)
+FetchContent_MakeAvailable(ser20)
+target_link_libraries(${PROJECT_NAME} PRIVATE ser20::ser20)
 
 # ---Ignore .vscode/settings.json in Git---
 find_package(Git QUIET)
+
 if(GIT_FOUND)
     get_filename_component(PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
-    if (EXISTS "${PARENT_DIR}/.git")
+
+    if(EXISTS "${PARENT_DIR}/.git")
         execute_process(COMMAND ${GIT_EXECUTABLE} update-index --assume-unchanged .vscode/settings.json
             WORKING_DIRECTORY ${PARENT_DIR}
             RESULT_VARIABLE ERRORS)
+
         if(NOT ERRORS EQUAL "0")
             message("Git assume-unchanged failed: ${ERRORS}")
         endif()

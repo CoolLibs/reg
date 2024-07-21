@@ -1,15 +1,14 @@
 #pragma once
-
-#include <cereal/types/memory.hpp>
-#include <cereal/types/tuple.hpp>
-#include <cereal/types/unordered_map.hpp>
-#include <cereal/types/utility.hpp>
-#include <cereal/types/variant.hpp>
-#include <cereal/types/vector.hpp>
+#include <ser20/types/memory.hpp>
+#include <ser20/types/tuple.hpp>
+#include <ser20/types/unordered_map.hpp>
+#include <ser20/types/utility.hpp>
+#include <ser20/types/variant.hpp>
+#include <ser20/types/vector.hpp>
 #include <stdexcept>
 #include "reg.hpp"
 
-namespace cereal {
+namespace ser20 {
 
 template<class Archive>
 auto save_minimal(Archive const&, uuids::uuid const& uuid) -> std::string
@@ -51,52 +50,52 @@ void load_minimal(Archive const& ar, reg::AnyId& id, std::string const& value)
 template<class Archive, typename T, typename Map>
 void serialize(Archive& archive, reg::internal::OrderPreservingMap<T, Map>& map)
 {
-    archive(cereal::make_nvp("Underlying container", map.underlying_container()));
+    archive(ser20::make_nvp("Underlying container", map.underlying_container()));
 }
 
 template<class Archive, typename T>
 void serialize(Archive& archive, reg::RawRegistry<T>& registry)
 {
-    archive(cereal::make_nvp("Underlying container", registry.underlying_container()));
+    archive(ser20::make_nvp("Underlying container", registry.underlying_container()));
 }
 
 template<class Archive, typename T>
 void serialize(Archive& archive, reg::RawOrderedRegistry<T>& registry)
 {
-    archive(cereal::make_nvp("Underlying container", registry.underlying_container().underlying_container()));
+    archive(ser20::make_nvp("Underlying container", registry.underlying_container().underlying_container()));
 }
 
 template<class Archive, typename T, typename Map>
 void serialize(Archive& archive, reg::internal::RegistryImpl<T, Map>& registry)
 {
-    archive(cereal::make_nvp("Underlying registry", registry.underlying_wrapped_registry()));
+    archive(ser20::make_nvp("Underlying registry", registry.underlying_wrapped_registry()));
 }
 
 template<class Archive, typename... Ts>
 void serialize(Archive& archive, reg::Registries<Ts...>& registries)
 {
-    archive(cereal::make_nvp("Underlying registries", registries.underlying_registries()));
+    archive(ser20::make_nvp("Underlying registries", registries.underlying_registries()));
 }
 
 template<class Archive, typename T>
 void serialize(Archive& archive, reg::internal::IdDestroyer<T>& destroyer)
 {
     archive(
-        cereal::make_nvp("UUID", destroyer.underlying_uuid()),
-        cereal::make_nvp("Registry", destroyer.underlying_registry())
+        ser20::make_nvp("UUID", destroyer.underlying_uuid()),
+        ser20::make_nvp("Registry", destroyer.underlying_registry())
     );
 }
 
 template<class Archive, typename T>
 void serialize(Archive& archive, reg::UniqueId<T>& id)
 {
-    archive(cereal::make_nvp("Underlying", id.underlying_object()));
+    archive(ser20::make_nvp("Underlying", id.underlying_object()));
 }
 
 template<class Archive, typename T>
 void serialize(Archive& archive, reg::SharedId<T>& id)
 {
-    archive(cereal::make_nvp("Underlying", id.underlying_object()));
+    archive(ser20::make_nvp("Underlying", id.underlying_object()));
 }
 
-} // namespace cereal
+} // namespace ser20

@@ -376,7 +376,7 @@ TEST_CASE_TEMPLATE(
                 auto tmp_scope = registry.create_unique(3.f); // Can't be const if we want to move from it
                 REQUIRE(*registry.get(tmp_scope.raw()) == 3.f);
                 return std::move(tmp_scope); // Force a move, don't rely on copy-elision as this is not what we want to test
-            }();                             // Destructor of tmp_scope is called here but shouldn't do anything
+            }(); // Destructor of tmp_scope is called here but shouldn't do anything
             REQUIRE(*registry.get(final_scope.raw()) == 3.f);
         } // Destructor of final_scope is called here and should destroy the id
         CHECK(registry.is_empty());
@@ -386,14 +386,14 @@ TEST_CASE_TEMPLATE(
 }
 
 #pragma warning(disable : 5054) // "operator '|': deprecated between enumerations of different types"
-#pragma GCC diagnostic   push
+#pragma GCC diagnostic push
 #pragma clang diagnostic push
-#pragma GCC diagnostic   ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
-#include <cereal/archives/json.hpp>
-#pragma GCC diagnostic   pop
+#include <ser20/archives/json.hpp>
+#pragma GCC diagnostic pop
 #pragma clang diagnostic pop
-#include <reg/cereal.hpp>
+#include <reg/ser20.hpp>
 #include <sstream>
 
 TEST_CASE_TEMPLATE("Serialization()", Registry, reg::Registry<float>, reg::OrderedRegistry<float>)
@@ -405,7 +405,7 @@ TEST_CASE_TEMPLATE("Serialization()", Registry, reg::Registry<float>, reg::Order
     reg::SharedId<float> const shared_id = registry.create_shared(3.f);
     std::stringstream          ss{};
     {
-        cereal::JSONOutputArchive out_archive{ss};
+        ser20::JSONOutputArchive out_archive{ss};
         out_archive(id, unique_id, shared_id);
     }
 
@@ -414,7 +414,7 @@ TEST_CASE_TEMPLATE("Serialization()", Registry, reg::Registry<float>, reg::Order
     reg::UniqueId<float> out_unique_id;
     reg::SharedId<float> out_shared_id;
     {
-        cereal::JSONInputArchive in_archive{ss};
+        ser20::JSONInputArchive in_archive{ss};
         in_archive(out_id, out_unique_id, out_shared_id);
     }
 

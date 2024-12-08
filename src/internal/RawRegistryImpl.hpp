@@ -3,7 +3,7 @@
 #include <optional>
 #include <shared_mutex>
 #include "../Id.hpp"
-#include "generate_uuid.hpp"
+#include "../generate_uuid.hpp"
 
 namespace reg::internal {
 

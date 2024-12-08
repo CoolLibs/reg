@@ -2,7 +2,7 @@
 #include <array>
 #include <random>
 
-namespace reg::internal {
+namespace reg {
 
 static auto create_random_generator()
 {
@@ -20,4 +20,4 @@ auto generate_uuid() -> uuids::uuid
     return uuid_generator();
 }
 
-} // namespace reg::internal
+} // namespace reg

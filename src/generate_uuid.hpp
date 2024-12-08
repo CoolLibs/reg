@@ -1,8 +1,8 @@
 #pragma once
 #include <uuid.h>
 
-namespace reg::internal {
+namespace reg {
 
 auto generate_uuid() -> uuids::uuid;
 
-} // namespace reg::internal
+} // namespace reg
